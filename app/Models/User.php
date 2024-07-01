@@ -57,4 +57,18 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function trucks()
+    {
+        return $this->hasMany(Truck::class);
+    }
+
+    public function bitacoras()
+    {
+        return $this->hasMany(Bitacora::class);
+    }
+    public function relaciones()
+    {
+        return $this->hasMany(relaciones::class);
+    }
 }
