@@ -7,6 +7,8 @@ use App\Http\Controllers\TruckController;
 use App\Http\Controllers\EstatusController;
 use App\Http\Controllers\RelacionesController;
 use App\Http\Controllers\ContactoDirectoController;
+
+
 use App\Models\ContactoDirecto;
 use App\Models\Relaciones;
 use Illuminate\Support\Facades\Route;
@@ -32,8 +34,8 @@ Route::get('/', function () {
 
 
 Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-    // Route::view('/cliente/cliente', 'cliente.cliente')->name('cliente.cliente');
+     Route::resource('dashboard', truckController::class);
+    // // Route::view('/cliente/cliente', 'cliente.cliente')->name('cliente.cliente');
     Route::view('forms', 'forms')->name('forms');
     Route::view('cards', 'cards')->name('cards');
     Route::view('charts', 'charts')->name('charts');
@@ -58,4 +60,5 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
     Route::post('ruta.ruta', [RutaController::class, 'store'])->name('ruta.nuevo');
     Route::post('Contacto_directo.ruta', [ContactoDirectoController::class, 'store'])->name('contactodirecto.nuevo');
     Route::post('relaciones.create', [RelacionesController::class, 'store'])->name('Relaciones.create');
+    Route::post('truck.create', [TruckController::class, 'store'])->name('truck.create');
 });

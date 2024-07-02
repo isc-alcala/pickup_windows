@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-
+use Illuminate\Support\Facades\DB;
 use App\Models\Relaciones;
+use App\Models\Truck;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Auth;
 class TruckController extends Controller
 {
     /**
@@ -13,8 +15,9 @@ class TruckController extends Controller
      */
     public function index()
     {
-        $trelaciones = Relaciones::with([ 'cliente', 'contactoDirecto', 'carrier','rutas'])->get();
-        return view('Trucks.trucks', ['relaciones' => $trelaciones]);
+
+        $trucks = truck::with([ 'relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier','relaciones.rutas'])->get();
+        return view('Dashboard', ['trucks' => $trucks]);
     }
 
     /**
@@ -30,7 +33,34 @@ class TruckController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $obj = new Truck();
+        $obj->number_truck = $request->input('truck');
+        $obj->number_container= $request->input('container');
+        $obj->trailer_plates= $request->input('placas');
+        $obj->operator_name = $request->input('OP');
+        $obj->back_operator_name = $request->input('BOP');
+        $obj->relaciones_id = $request->input('relaciones');
+        $dateTime =  strtotime($request->input('fecha'));
+         $obj->ETA = date('d/m/Y H:i:s',  $dateTime);
+
+
+
+        $user = Auth::user()->id;
+
+
+
+
+        $obj->user_id = $user;
+
+        $idtreck=$obj->save();
+        dd(  $idtreck);
+
+
+
+        $truck= Truck::with([ 'cliente', 'contactoDirecto', 'carrier','rutas'])->get();
+        dd(  $truck);
+        return view('dashboard', ['Trucks' => $truck]);
+
     }
 
     /**
