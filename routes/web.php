@@ -61,4 +61,5 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
     Route::post('Contacto_directo.ruta', [ContactoDirectoController::class, 'store'])->name('contactodirecto.nuevo');
     Route::post('relaciones.create', [RelacionesController::class, 'store'])->name('Relaciones.create');
     Route::post('truck.create', [TruckController::class, 'store'])->name('truck.create');
+    Route::post('truck.update', [TruckController::class, 'update'])->name('truck.update');
 });

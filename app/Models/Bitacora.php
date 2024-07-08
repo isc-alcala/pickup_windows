@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Bitacora extends Model
 {
     use HasFactory;
-    protected $fillable = ['truck_id', 'user_id', 'estatus_id', 'comentario'];
+    protected $table = 'bitacora';
     public function truck()
     {
         return $this->belongsTo(truck::class);
     }
+
     public function user()
     {
         return $this->belongsTo(User::class);

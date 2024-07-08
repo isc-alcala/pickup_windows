@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class estatus extends Model
 {
     use HasFactory;
-    protected $fillable = ['nombre', 'descripcion'];
-    public function bitacoras()
+    protected $table = 'estatus';
+    // protected $fillable = ['nombre', 'descripcion'];
+
+
+    public function bitacora()
     {
-        return $this->hasMany(Bitacora::class);
+        return $this->hasMany(bitacora::class);
     }
     public function contactos()
     {
@@ -23,7 +26,7 @@ class estatus extends Model
     }
     public function ruta()
     {
-        return $this->hasMany(ruta::class);
+        return $this->hasMany(rutas::class);
     }
     public function contactodirecto()
     {
