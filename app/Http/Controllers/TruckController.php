@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Bitacora;
 use Illuminate\Support\Facades\DB;
 use App\Models\Relaciones;
+use App\Models\estatus;
 use App\Models\Truck;
+use Illuminate\Database\Console\Migrations\StatusCommand;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
@@ -17,10 +19,8 @@ class TruckController extends Controller
      */
     public function index()
     {
-
         $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
-
-        return view('Dashboard', ['trucks' => $trucks]);
+        return view('Dashboard',['trucks'=>$trucks]);
     }
 
     /**
@@ -96,4 +96,26 @@ class TruckController extends Controller
     {
         //
     }
+
+    public function test(Truck $id, $status) {
+
+$estatus= estatus::where('id',$status)->first();
+
+        return view('trucks.truck-modal', ['truck' => $id,'estatus'=>$estatus]);
+    }
+
+    public function status( Request $request) {
+        $user = Auth::user()->id;
+
+
+        $bit = new Bitacora();
+        $bit->truck_id = $request->id;
+        $bit->user_id = $user;
+        $bit->estatus_id = $request->idestatus;
+        $bit->comentario = $request->comentario ?? 'N/A';
+        $bit->save();
+
+        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora'])->Paginate(5);
+        return view('dashboard', ['trucks' => $trucks]);
+            }
 }

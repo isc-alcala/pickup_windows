@@ -11,6 +11,7 @@ use App\Http\Controllers\ContactoDirectoController;
 
 use App\Models\ContactoDirecto;
 use App\Models\Relaciones;
+use App\Models\Truck;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,4 +63,10 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
     Route::post('relaciones.create', [RelacionesController::class, 'store'])->name('Relaciones.create');
     Route::post('truck.create', [TruckController::class, 'store'])->name('truck.create');
     Route::post('truck.update', [TruckController::class, 'update'])->name('truck.update');
+
+    Route::post('truck.status', [TruckController::class, 'status'])->name('truck.status');
+
+
+
+    Route::get('truck-test/{id}/{status}', [TruckController::class, 'test'])->name('truck.test');
 });
