@@ -146,7 +146,7 @@ $year = 2024;
 
             $datadia=[
                 "golpes"=> $golpes->produc,
-                "dia"=>$date->format('d/m/Y')
+                "diames"=>$date->format('d/m/Y')
 
             ];
             array_push($dias,  $datadia);

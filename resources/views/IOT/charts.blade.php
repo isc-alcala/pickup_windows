@@ -23,7 +23,7 @@
                                             <!-- Avatar with inset shadow -->
 
                                             <div>
-                                                <p class="font-semibold text-9xl">15000</p>
+                                                <p class="font-semibold text-16xl">15000</p>
 
                                             </div>
                                         </div>
@@ -65,32 +65,20 @@
                 </div>
             </div>
         </div>
-        <div class="grid gap-6 mb-8 md:grid-cols-1">
-            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+        <div class="grid gap-6 mb-8 md:grid-cols-1 lg:grid-cols-1">
+            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800 h-1/2">
                 <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
                     Grafica golpes
                 </h4>
                 <canvas id="bars1"></canvas>
-                <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
-                    <!-- Chart legend -->
-                    <div class="flex items-center">
-                        <span class="inline-block w-3 h-3 mr-1 bg-teal-500 rounded-full"></span>
-                        <span>Diferencia</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="inline-block w-3 h-3 mr-1 bg-purple-600 rounded-full"></span>
-                        <span>Golpes</span>
-                    </div>
-                </div>
+
             </div>
-            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800 h-1/2">
                 <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
                     Grafica golpes
                 </h4>
                 <canvas id="bars2"></canvas>
-
             </div>
-
         </div>
     </div>
 
@@ -99,7 +87,7 @@
             var ctx = document.getElementById('bars1').getContext('2d');
             var ctx1 = document.getElementById('bars2').getContext('2d');
             var data = @json($dataall); // Convertir los datos PHP a JSON
-            var data1= @json($dias); // Convertir los datos PHP a JSON
+            var data1 = @json($dias); // Convertir los datos PHP a JSON
 
             // Suponiendo que data tiene las propiedades 'label', 'shoes', y 'bags'
 
@@ -149,29 +137,20 @@
             });
 
             var modelo1 = data.map(item => item.dia);
-            var dias = data1.map(item => item.dia);
+            var dias = data1.map(item => item.diames);
             var produccion1 = data1.map(item => item.golpes);
             new Chart(ctx1, {
                 type: 'bar',
                 data: {
-                    labels: modelo1,
+                    labels: dias,
                     datasets: [{
-                            label: 'Golpes',
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1,
-                            data: produccion1,
-                            stack: 'combined'
-                        },
-                        {
-                            label: 'Plan', // Etiqueta para los datos de la línea
-                            type: 'line',
-                            fill: false,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 2,
-                            data: dias,
-                        }
-                    ]
+                        label: 'Golpes',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        data: produccion1,
+                        stack: 'combined'
+                    }, ]
                 },
                 options: {
                     scales: {
