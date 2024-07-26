@@ -7,8 +7,7 @@ use App\Http\Controllers\TruckController;
 use App\Http\Controllers\EstatusController;
 use App\Http\Controllers\RelacionesController;
 use App\Http\Controllers\ContactoDirectoController;
-
-
+use App\Http\Controllers\IotController;
 use App\Models\ContactoDirecto;
 use App\Models\Relaciones;
 use App\Models\Truck;
@@ -36,6 +35,8 @@ Route::get('/', function () {
 
 Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
      Route::resource('dashboard', truckController::class);
+     Route::resource('IOT', IotController::class);
+     Route::get('/chart-data', [IotController::class, 'getDataForChart']);
     // // Route::view('/cliente/cliente', 'cliente.cliente')->name('cliente.cliente');
     Route::view('forms', 'forms')->name('forms');
     Route::view('cards', 'cards')->name('cards');
