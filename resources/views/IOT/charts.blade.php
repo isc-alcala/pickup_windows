@@ -87,7 +87,7 @@
                 <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
                     Grafica golpes
                 </h4>
-                <canvas id="bars1"></canvas>
+                <canvas id="bars2"></canvas>
                 <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
                     <!-- Chart legend -->
                     <div class="flex items-center">
@@ -106,7 +106,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var ctx = document.getElementById('bars1').getContext('2d');
+            var ctx1 = document.getElementById('bars2').getContext('2d');
             var data = @json($dataall); // Convertir los datos PHP a JSON
+            var data1 = @json($dias); // Convertir los datos PHP a JSON
+
 
             // Suponiendo que data tiene las propiedades 'label', 'shoes', y 'bags'
 
@@ -145,6 +148,33 @@
                             data: lineData,
 
                         }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            var dia = data1.map(item => item.diames);
+            var golpes = data1.map(item => item.golpes);
+
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: dia,
+                    datasets: [{
+                            label: 'Shoes',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            data: golpes,
+                            stack: 'combined'
+                        },
+
+
                     ]
                 },
                 options: {
