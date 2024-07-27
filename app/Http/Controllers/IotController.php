@@ -20,9 +20,17 @@ class IotController extends Controller
         $formattedDate = Carbon::now()->setTime(20, 6)->format('Y-m-d H:i');
         $seleccionturno = Carbon::now()->format('Y-m-d H:i');
 
+
         $matution = [];
         $nocturno = [];
         $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500', []);
+        $sql2='SELECT Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
+        FROM Plan_produccionIOT
+        GROUP BY Fecha, Turno
+        ORDER BY Fecha, Turno;';
+        $planmes=DB::connection('iotmoi')->select($sql2);
+
+
         // $contador=DB::connection('ultateck')->select('Historial_TRF2500', []);
         $collection = collect($data);
         // Si necesitas agrupar los resultados por hora y sumar las piezas
@@ -110,7 +118,7 @@ class IotController extends Controller
 
             $nextDay = $date->copy()->addDay();
 
-            $sql = "
+            $sqldia= "
             WITH CustomerCTE AS (
                 SELECT
                     numeroContenedor_NumeroParteActual,
@@ -122,7 +130,30 @@ class IotController extends Controller
                     MIN(fecha) AS inicio,
                     MAX(fecha) AS fin
                 FROM [YKMPrensas].[dbo].[Historial_TRF2500]
-                WHERE (fecha > '" . $date->format('d/m/Y') . " 08:00:00' AND fecha < '" .  $nextDay->format('d/m/Y') . " 08:00:00')
+                WHERE (fecha > '" . $date->format('d/m/Y') . " 08:00:00' AND fecha < '" .  $date->format('d/m/Y') . " 20:06:00')
+                    AND contadorTotal_ProduccionReal IS NOT NULL
+                    AND contadorTotal_ProduccionReal != 0
+                    AND numeroContenedor_NombreParteActual != ''
+                    AND numeroContenedor_NumeroParteActual IS NOT NULL
+                GROUP BY numeroContenedor_NumeroParteActual
+            )
+            SELECT SUM(contadorTotal_ProduccionReal) AS produc
+            FROM [YKMPrensas].[dbo].[Historial_TRF2500]
+            WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
+            ";
+            $sqlnoche= "
+            WITH CustomerCTE AS (
+                SELECT
+                    numeroContenedor_NumeroParteActual,
+                    MIN(eventoTRF_Id) AS evmin,
+                    MAX(eventoTRF_Id) AS maxev,
+                    MAX(contadorTotal_ProduccionReal) AS prod,
+                    MIN(contadorTotal_ProduccionReal) AS prodm,
+                    MAX(numeroContenedor_NombreParteActual) AS produ,
+                    MIN(fecha) AS inicio,
+                    MAX(fecha) AS fin
+                FROM [YKMPrensas].[dbo].[Historial_TRF2500]
+                WHERE (fecha > '" . $date->format('d/m/Y') . " 20:06:00' AND fecha < '" .  $nextDay->format('d/m/Y') . " 08:00:00')
                     AND contadorTotal_ProduccionReal IS NOT NULL
                     AND contadorTotal_ProduccionReal != 0
                     AND numeroContenedor_NombreParteActual != ''
@@ -134,14 +165,18 @@ class IotController extends Controller
             WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
             ";
 
-            $result = DB::connection('ultateck')->select($sql);
-            $golpes = $result[0];
-
+            $resultdia = DB::connection('ultateck')->select($sqldia);
+            $resultnoche = DB::connection('ultateck')->select($sqlnoche);
+            $golpesdia = $resultdia[0];
+            $golpesnoche = $resultnoche[0];
 
             $datadia = [
-                "golpes" => $golpes->produc,
-                "diames" => $date->format('d/m/Y')
-
+                "golpes" => $golpesdia->produc,
+                "diames" => $date->format('d/m/Y'). " D"
+            ];
+            $datadia = [
+                "golpes" => $golpesnoche->produc,
+                "diames" => $date->format('d/m/Y'). " N"
             ];
             array_push($dias,  $datadia);
         }
