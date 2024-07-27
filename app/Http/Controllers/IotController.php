@@ -6,7 +6,8 @@ use Carbon\Carbon;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\CarbonPeriod;
+use carbon\CarbonPeriod;
+
 class IotController extends Controller
 {
     /**
@@ -19,111 +20,19 @@ class IotController extends Controller
         $formattedDate = Carbon::now()->setTime(20, 6)->format('Y-m-d H:i');
         $seleccionturno = Carbon::now()->format('Y-m-d H:i');
 
-        $inicio = 0;
-        $fin = 0;
-        // Llamar al procedimiento almacenado con el parámetro de fecha
-        $p1 = 24;
-        $p2 = 07;
-        $p3 = 2024;
-        $p4 = 25;
-        $p5 = 07;
-        $p6 = 2024;
-        // $pp=DB::connection('ultateck')->select('CALL web_dashboard_trf2500()');
-        $dateString = '22/07/2024 8:00:00';
-        $date = Carbon::createFromFormat('d/m/Y H:i:s', $dateString);
-
-        $dateString = '23/07/2024 8:00:00';
-        $date1 = Carbon::createFromFormat('d/m/Y H:i:s', $dateString);
-
 
         $matution = [];
         $nocturno = [];
-        // $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500', []);
-        $year = 2024;
-        $month = 7;
+        $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500', []);
+        $sql2='SELECT Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
+        FROM Plan_produccionIOT
+        GROUP BY Fecha, Turno
+        ORDER BY Fecha, Turno;';
+        $planmes=DB::connection('iotmoi')->select($sql2);
 
-        // Crear una fecha inicial y una fecha final para el mes especificado
-        $startOfMonth = Carbon::create($year, $month, 1);
-        $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
-        // Crear un período de fechas desde el inicio hasta el final del mes
-        $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
-        $dias=[];
-        $datadia=[];
-        foreach ($period as $date) {
-            
-            $nextDay = $date->copy()->addDay();
-            
-            $sql = "
-            WITH CustomerCTE AS (
-                SELECT 
-                    numeroContenedor_NumeroParteActual,  
-                    MIN(eventoTRF_Id) AS evmin, 
-                    MAX(eventoTRF_Id) AS maxev, 
-                    MAX(contadorTotal_ProduccionReal) AS prod, 
-                    MIN(contadorTotal_ProduccionReal) AS prodm, 
-                    MAX(numeroContenedor_NombreParteActual) AS produ, 
-                    MIN(fecha) AS inicio, 
-                    MAX(fecha) AS fin
-                FROM [YKMPrensas].[dbo].[Historial_TRF2500] 
-                WHERE (fecha > '" . $date->format('d/m/Y') . " 08:00:00' AND fecha < '" .  $nextDay->format('d/m/Y') . " 08:00:00') 
-                    AND contadorTotal_ProduccionReal IS NOT NULL 
-                    AND contadorTotal_ProduccionReal != 0 
-                    AND numeroContenedor_NombreParteActual != ''
-                    AND numeroContenedor_NumeroParteActual IS NOT NULL 
-                GROUP BY numeroContenedor_NumeroParteActual
-            )
-            SELECT SUM(contadorTotal_ProduccionReal) AS produc 
-            FROM [YKMPrensas].[dbo].[Historial_TRF2500] 
-            WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
-            ";
-    
-            $result = DB::connection('ultateck')->select($sql);
-            $golpes=$result[0];
-           
-           
-            $datadia=[
-                "golpes"=> $golpes->produc,
-                "dia"=>$date->format('d/m/Y')
-                
-            ];
-            array_push($dias,  $datadia);
-
-        }
-
-        //         $dateString = '22/07/2024 8:00:00';
-//         $date = Carbon::createFromFormat('d/m/Y H:i:s', $dateString);
-// $nextDay = $date->copy()->addDay();
-//         $dateString = '23/07/2024 8:00:00';
-//         $date1 = Carbon::createFromFormat('d/m/Y H:i:s', $dateString);
-        $sql = "
-        WITH CustomerCTE AS (
-            SELECT 
-                numeroContenedor_NumeroParteActual,  
-                MIN(eventoTRF_Id) AS evmin, 
-                MAX(eventoTRF_Id) AS maxev, 
-                MAX(contadorTotal_ProduccionReal) AS prod, 
-                MIN(contadorTotal_ProduccionReal) AS prodm, 
-                MAX(numeroContenedor_NombreParteActual) AS produ, 
-                MIN(fecha) AS inicio, 
-                MAX(fecha) AS fin
-            FROM [YKMPrensas].[dbo].[Historial_TRF2500] 
-            WHERE (fecha > '" . $date->format('d/m/Y H:i:s') . "' AND fecha < '" . $date1->format('d/m/Y H:i:s') . "') 
-                AND contadorTotal_ProduccionReal IS NOT NULL 
-                AND contadorTotal_ProduccionReal != 0 
-                AND numeroContenedor_NombreParteActual != ''
-                AND numeroContenedor_NumeroParteActual IS NOT NULL 
-            GROUP BY numeroContenedor_NumeroParteActual
-        )
-        SELECT SUM(contadorTotal_ProduccionReal) AS produc 
-        FROM [YKMPrensas].[dbo].[Historial_TRF2500] 
-        WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
-        ";
-
-        $result = DB::connection('ultateck')->select($sql);
-        dd($result);
-        $collection = collect($result);
-
+        // $contador=DB::connection('ultateck')->select('Historial_TRF2500', []);
+        $collection = collect($data);
         // Si necesitas agrupar los resultados por hora y sumar las piezas
         $groupedResults = $collection->groupBy(function ($item) {
             return date('H', strtotime($item->fecha));
@@ -133,16 +42,16 @@ class IotController extends Controller
                 'hora' => $hourlyData->max('fecha'),
             ];
         });
-
         $data = [];
         $dataall = [];
         $turnoant = '';
         $turnoact = '';
         $hoy = Carbon::now()->format('d/m/Y');
+        $fechaConHora = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 9:00:00');
+        // $fechaConHora = Carbon::createFromFormat('d/m/Y H:i:s','25/07/2024 21:00:00');
+        $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 9:00:00');
+        //  $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', '25/07/2024 21:00:00');
 
-        // Combinar la fecha de hoy con la hora específica
-        $fechaConHora = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 08:00:00');
-        $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 09:00:00');
         $PLANANT = 14000;
         $PLANAct = 12000;
         $SUMD = 0;
@@ -164,66 +73,116 @@ class IotController extends Controller
             }
 
             $fechaOriginal = Carbon::parse($result['hora']);
+            $fechaOriginal = Carbon::parse($result['hora']);
             $fechaFormateada = $fechaOriginal->format('d/m H');
-            if ($fechaConHora->eq($result['hora'])) {
-                $turnoant = $result['total_piezas'];
-            } else {
-                if ($result['total_piezas'] != 0) {
-                    $turnoact = $result['total_piezas'];
+
+            if ($result['hora'])
+
+                if ($fechaConHora->eq($result['hora'])) {
+
+                    $turnoant = $result['total_piezas'];
+                } else {
+                    if ($result['total_piezas'] != 0) {
+                        $turnoact = $result['total_piezas'];
+                    }
                 }
-            }
+
             $rest = $result['total_piezas'] - floor($PLAN);
             if ($rest < 0) {
                 $rest = $rest * -1;
+            } else {
             }
             $data = [
                 'hora' => $fechaFormateada,
                 'total_piezas' => $result['total_piezas'],
                 'plan' => floor($PLAN),
+                'plan1' => floor($PLAN) + 100,
                 'dif' => $rest,
             ];
             array_push($dataall, $data);
-
-
         }
 
 
+        $year = 2024;
+        $month = 7;
 
+        // Crear una fecha inicial y una fecha final para el mes especificado
+        $startOfMonth = Carbon::create($year, $month, 1);
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
+        // Crear un período de fechas desde el inicio hasta el final del mes
+        $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
+        $dias = [];
+        $datadia = [];
+        foreach ($period as $date) {
 
+            $nextDay = $date->copy()->addDay();
 
+            $sqldia= "
+            WITH CustomerCTE AS (
+                SELECT
+                    numeroContenedor_NumeroParteActual,
+                    MIN(eventoTRF_Id) AS evmin,
+                    MAX(eventoTRF_Id) AS maxev,
+                    MAX(contadorTotal_ProduccionReal) AS prod,
+                    MIN(contadorTotal_ProduccionReal) AS prodm,
+                    MAX(numeroContenedor_NombreParteActual) AS produ,
+                    MIN(fecha) AS inicio,
+                    MAX(fecha) AS fin
+                FROM [YKMPrensas].[dbo].[Historial_TRF2500]
+                WHERE (fecha > '" . $date->format('d/m/Y') . " 08:00:00' AND fecha < '" .  $date->format('d/m/Y') . " 20:06:00')
+                    AND contadorTotal_ProduccionReal IS NOT NULL
+                    AND contadorTotal_ProduccionReal != 0
+                    AND numeroContenedor_NombreParteActual != ''
+                    AND numeroContenedor_NumeroParteActual IS NOT NULL
+                GROUP BY numeroContenedor_NumeroParteActual
+            )
+            SELECT SUM(contadorTotal_ProduccionReal) AS produc
+            FROM [YKMPrensas].[dbo].[Historial_TRF2500]
+            WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
+            ";
+            $sqlnoche= "
+            WITH CustomerCTE AS (
+                SELECT
+                    numeroContenedor_NumeroParteActual,
+                    MIN(eventoTRF_Id) AS evmin,
+                    MAX(eventoTRF_Id) AS maxev,
+                    MAX(contadorTotal_ProduccionReal) AS prod,
+                    MIN(contadorTotal_ProduccionReal) AS prodm,
+                    MAX(numeroContenedor_NombreParteActual) AS produ,
+                    MIN(fecha) AS inicio,
+                    MAX(fecha) AS fin
+                FROM [YKMPrensas].[dbo].[Historial_TRF2500]
+                WHERE (fecha > '" . $date->format('d/m/Y') . " 20:06:00' AND fecha < '" .  $nextDay->format('d/m/Y') . " 08:00:00')
+                    AND contadorTotal_ProduccionReal IS NOT NULL
+                    AND contadorTotal_ProduccionReal != 0
+                    AND numeroContenedor_NombreParteActual != ''
+                    AND numeroContenedor_NumeroParteActual IS NOT NULL
+                GROUP BY numeroContenedor_NumeroParteActual
+            )
+            SELECT SUM(contadorTotal_ProduccionReal) AS produc
+            FROM [YKMPrensas].[dbo].[Historial_TRF2500]
+            WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
+            ";
 
-        // $data = DB::connection('ultateck')->table('Historial_TRF2500')
-        // ->selectRaw('numeroContenedor_NumeroParteActual,
-        //              MIN(eventoTRF_Id) as evmin,
-        //              MAX(eventoTRF_Id) as maxev,
-        //              MAX(contadorTotal_ProduccionReal) as prod,
-        //              MIN(contadorTotal_ProduccionReal) as prodm,
-        //              MAX(numeroContenedor_NombreParteActual) as modelo,
-        //              MIN(fecha) as inicio,
-        //              MAX(fecha) as fin')
-        // ->where('fecha', '>', '23/07/2024 20:06:00')
-        // ->where('fecha', '<', '24/07/2024 20:06:00')
-        // ->whereNotNull('contadorTotal_ProduccionReal')
-        // ->where('contadorTotal_ProduccionReal', '!=', 0)
-        // ->groupBy('numeroContenedor_NumeroParteActual')
-        // ->orderBy('maxev')
-        // ->get();
+            $resultdia = DB::connection('ultateck')->select($sqldia);
+            $resultnoche = DB::connection('ultateck')->select($sqlnoche);
+            $golpesdia = $resultdia[0];
+            $golpesnoche = $resultnoche[0];
 
-
-        // foreach ($data as $dat); {
-        //     $time = date('H:i:s', strtotime($dat->fecha_inicio));
-
-        //     if ($time <= $formattedDate) {
-        //         $matution[] = $dat;
-        //     } else {
-        //         $nocturno[] = $dat;
-        //     }
-        // }
-
-
-        return view('IOT.charts', compact('dataall', 'turnoant', 'turnoact'));
+            $datadia = [
+                "golpes" => $golpesdia->produc,
+                "diames" => $date->format('d/m/Y'). " D"
+            ];
+            $datadia = [
+                "golpes" => $golpesnoche->produc,
+                "diames" => $date->format('d/m/Y'). " N"
+            ];
+            array_push($dias,  $datadia);
+        }
+        return view('IOT.charts', compact('dataall', 'turnoant', 'turnoact', 'dias'));
     }
+
 
     /**
      * Show the form for creating a new resource.

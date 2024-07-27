@@ -1,11 +1,11 @@
 <x-app-layout title="Charts">
     <div class="container grid px-6 mx-auto">
-        <div class="grid gap-6 mb-8 center">
-            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-                <h4 class="mb-4 font-semibold text-gray-600 dark:text-gray-300">
+
+
+                <h4 class= "mb-4 font-semibold text-gray-600 dark:text-gray-300">
                     PRODUCCION
                 </h4>
-                <div class="w-full overflow-hidden rounded-lg shadow-xs">
+                <div class="w-full max-h-180">
                     <div class="w-full overflow-x-auto">
                         <table class="w-full whitespace-no-wrap">
                             <thead>
@@ -63,50 +63,29 @@
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="grid gap-6 mb-8 md:grid-cols-2">
-            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-                <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
-                    Grafica golpes
-                </h4>
-                <canvas id="bars1"></canvas>
-                <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
-                    <!-- Chart legend -->
-                    <div class="flex items-center">
-                        <span class="inline-block w-3 h-3 mr-1 bg-teal-500 rounded-full"></span>
-                        <span>Shoes</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="inline-block w-3 h-3 mr-1 bg-purple-600 rounded-full"></span>
-                        <span>Bags</span>
-                    </div>
+                <div class="w-full max-h-100">
+                    <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
+                        Grafica golpes
+                    </h4>
+                    <canvas id="bars1" height="50" ></canvas>
                 </div>
-            </div>
-            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-                <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
-                    Grafica golpes
-                </h4>
-                <canvas id="bars1"></canvas>
-                <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
-                    <!-- Chart legend -->
-                    <div class="flex items-center">
-                        <span class="inline-block w-3 h-3 mr-1 bg-teal-500 rounded-full"></span>
-                        <span>Shoes</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="inline-block w-3 h-3 mr-1 bg-purple-600 rounded-full"></span>
-                        <span>Bags</span>
-                    </div>
+                <div class="w-full max-h-100">
+                    <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
+                        Grafica golpes
+                    </h4>
+                    <canvas id="bars2" height="50"></canvas>
                 </div>
-            </div>
-        </div>
+
+
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var ctx = document.getElementById('bars1').getContext('2d');
+            var ctx1 = document.getElementById('bars2').getContext('2d');
             var data = @json($dataall); // Convertir los datos PHP a JSON
+            var data1 = @json($dias); // Convertir los datos PHP a JSON
+
 
             // Suponiendo que data tiene las propiedades 'label', 'shoes', y 'bags'
 
@@ -120,7 +99,7 @@
                 data: {
                     labels: modelo,
                     datasets: [{
-                            label: 'Shoes',
+                            label: 'Golpes',
                             backgroundColor: 'rgba(54, 162, 235, 0.2)',
                             borderColor: 'rgba(54, 162, 235, 1)',
                             borderWidth: 1,
@@ -128,7 +107,7 @@
                             stack: 'combined'
                         },
                         {
-                            label: 'Bags',
+                            label: 'Diferencia',
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             borderColor: 'rgba(255, 99, 132, 1)',
                             borderWidth: 1,
@@ -136,7 +115,7 @@
                             stack: 'combined'
                         },
                         {
-                            label: 'Line Data', // Etiqueta para los datos de la línea
+                            label: 'Plan', // Etiqueta para los datos de la línea
                             type: 'line',
                             fill: false,
 
@@ -150,9 +129,38 @@
                 options: {
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+
+
                         }
                     }
+                }
+            });
+            var dia = data1.map(item => item.diames);
+            var golpes = data1.map(item => item.golpes);
+
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: dia,
+                    datasets: [{
+                            label: 'Golpes',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            data: golpes,
+                            stack: 'combined'
+                        },
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+
+                        }
+                    }
+
                 }
             });
         });
