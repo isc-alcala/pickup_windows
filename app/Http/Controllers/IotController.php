@@ -19,16 +19,22 @@ class IotController extends Controller
 
         $formattedDate = Carbon::now()->setTime(20, 6)->format('Y-m-d H:i');
         $seleccionturno = Carbon::now()->format('Y-m-d H:i');
-
-
         $matution = [];
         $nocturno = [];
         $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500', []);
-        $sql2='SELECT Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
-        FROM Plan_produccionIOT
+        $contadorp = DB::connection('ultateck')->table('Historial_TRF2500')->orderby('fecha','desc')->first();
+        // dd($contadorp);
+        $sql2='Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
+        FROM Planprensas
         GROUP BY Fecha, Turno
         ORDER BY Fecha, Turno;';
-        $planmes=DB::connection('iotmoi')->select($sql2);
+        $planmes=DB::table('planprensas')->select(DB::raw('Fecha, Turno, SUM(cantidad) AS total_acumulado'))
+        ->groupBy('Fecha', 'Turno')
+        ->orderBy('Fecha')
+        ->orderBy('Turno')
+        ->get();
+
+        // $plandia=$planmes->where('Fecha', now()->format('Y-m-d'))->sum('total_acumulado');
 
 
         // $contador=DB::connection('ultateck')->select('Historial_TRF2500', []);
@@ -48,11 +54,13 @@ class IotController extends Controller
         $turnoact = '';
         $hoy = Carbon::now()->format('d/m/Y');
         $fechaConHora = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 9:00:00');
+
         // $fechaConHora = Carbon::createFromFormat('d/m/Y H:i:s','25/07/2024 21:00:00');
         $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 9:00:00');
         //  $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', '25/07/2024 21:00:00');
 
-        $PLANANT = 14000;
+
+        $PLANANT = 7200;
         $PLANAct = 12000;
         $SUMD = 0;
         $SUMN = 0;
@@ -118,6 +126,7 @@ class IotController extends Controller
 
             $nextDay = $date->copy()->addDay();
 
+
             $sqldia= "
             WITH CustomerCTE AS (
                 SELECT
@@ -141,6 +150,7 @@ class IotController extends Controller
             FROM [YKMPrensas].[dbo].[Historial_TRF2500]
             WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
             ";
+
             $sqlnoche= "
             WITH CustomerCTE AS (
                 SELECT
@@ -165,22 +175,35 @@ class IotController extends Controller
             WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
             ";
 
+
+            $buscarfe=$planmes->where('Fecha', $date->format('Y-m-d'))->where('Turno','D');
+            $buscarfeN=$planmes->where('Fecha', $date->format('Y/m/d'))->where('Turno','N');
             $resultdia = DB::connection('ultateck')->select($sqldia);
             $resultnoche = DB::connection('ultateck')->select($sqlnoche);
             $golpesdia = $resultdia[0];
-            $golpesnoche = $resultnoche[0];
 
+            $golpesnoche = $resultnoche[0];
+            if( $date->eq(now()->format('d-m-Y')))
+            {
+                $turnoact=$golpesdia->produc+$golpesnoche->produc;
+            }
             $datadia = [
-                "golpes" => $golpesdia->produc,
-                "diames" => $date->format('d/m/Y'). " D"
-            ];
-            $datadia = [
-                "golpes" => $golpesnoche->produc,
-                "diames" => $date->format('d/m/Y'). " N"
+                "golpes" => $golpesdia->produc ?? 0,
+                "diames" => $date->format('d/m/Y'). " D",
+                "plan"=> $buscarfe->first()->total_acumulado ?? 0
             ];
             array_push($dias,  $datadia);
+            $datano = [
+                "golpes" => $golpesnoche->produc ?? 0,
+                "diames" => $date->format('d/m/Y'). " N",
+                "plan"=> $buscarfe->first()->total_acumulado ?? 0
+            ];
+            array_push($dias,  $datano);
         }
-        return view('IOT.charts', compact('dataall', 'turnoant', 'turnoact', 'dias'));
+
+
+        return view('IOT.charts', compact('dataall', 'turnoant', 'turnoact', 'dias','contadorp'));
+        // return view('IOT.charts');
     }
 
 
