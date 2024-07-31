@@ -68,6 +68,6 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
     Route::post('truck.status', [TruckController::class, 'status'])->name('truck.status');
 
 
-
+    Route::get('/api/get-data', [App\Http\Controllers\IotturnoController::class, 'getData']);
     Route::get('truck-test/{id}/{status}', [TruckController::class, 'test'])->name('truck.test');
 });

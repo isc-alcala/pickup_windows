@@ -21,18 +21,19 @@ class IotController extends Controller
         $seleccionturno = Carbon::now()->format('Y-m-d H:i');
         $matution = [];
         $nocturno = [];
-        $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500', []);
-        $contadorp = DB::connection('ultateck')->table('Historial_TRF2500')->orderby('fecha','desc')->first();
+        $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500');
+
+        $contadorp = DB::connection('ultateck')->table('Historial_TRF2500')->orderby('fecha', 'desc')->first();
         // dd($contadorp);
-        $sql2='Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
+        $sql2 = 'Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
         FROM Planprensas
         GROUP BY Fecha, Turno
         ORDER BY Fecha, Turno;';
-        $planmes=DB::table('planprensas')->select(DB::raw('Fecha, Turno, SUM(cantidad) AS total_acumulado'))
-        ->groupBy('Fecha', 'Turno')
-        ->orderBy('Fecha')
-        ->orderBy('Turno')
-        ->get();
+        $planmes = DB::table('planprensas')->select(DB::raw('Fecha, Turno, SUM(cantidad) AS total_acumulado'))
+            ->groupBy('Fecha', 'Turno')
+            ->orderBy('Fecha')
+            ->orderBy('Turno')
+            ->get();
 
         // $plandia=$planmes->where('Fecha', now()->format('Y-m-d'))->sum('total_acumulado');
 
@@ -48,7 +49,9 @@ class IotController extends Controller
                 'hora' => $hourlyData->max('fecha'),
             ];
         });
-        $data = [];
+
+
+
         $dataall = [];
         $turnoant = '';
         $turnoact = '';
@@ -58,7 +61,6 @@ class IotController extends Controller
         // $fechaConHora = Carbon::createFromFormat('d/m/Y H:i:s','25/07/2024 21:00:00');
         $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 9:00:00');
         //  $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', '25/07/2024 21:00:00');
-
 
         $PLANANT = 7200;
         $PLANAct = 12000;
@@ -81,7 +83,7 @@ class IotController extends Controller
             }
 
             $fechaOriginal = Carbon::parse($result['hora']);
-            $fechaOriginal = Carbon::parse($result['hora']);
+
             $fechaFormateada = $fechaOriginal->format('d/m H');
 
             if ($result['hora'])
@@ -96,10 +98,12 @@ class IotController extends Controller
                 }
 
             $rest = $result['total_piezas'] - floor($PLAN);
-            if ($rest < 0) {
+            if ($result['total_piezas'] < floor($PLAN)) {
                 $rest = $rest * -1;
             } else {
+                $rest = 0;
             }
+
             $data = [
                 'hora' => $fechaFormateada,
                 'total_piezas' => $result['total_piezas'],
@@ -113,96 +117,195 @@ class IotController extends Controller
 
         $year = 2024;
         $month = 7;
+        $monthback = 6;
 
         // Crear una fecha inicial y una fecha final para el mes especificado
+        $startOfMonthback = Carbon::create($year, $monthback, 1);
+        $endOfMonthback = $startOfMonthback->copy()->endOfMonth();
+        $mondays = [];
+        $currentDay = $startOfMonthback->copy();
+        while ($currentDay->lte($endOfMonthback)) {
+            // Si el día es lunes, agregarlo al array
+            if ($currentDay->isMonday()) {
+                $mondays[] = $currentDay->toDateString();
+            }
+            // Avanzar al siguiente día
+            $currentDay->addDay();
+        }
+
         $startOfMonth = Carbon::create($year, $month, 1);
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
 
+
+        // Array para almacenar los lunes del mes
+
+
+        // Iterar a través de cada día del mes
+        $currentDay = $startOfMonth->copy();
+        while ($currentDay->lte($endOfMonth)) {
+            // Si el día es lunes, agregarlo al array
+            if ($currentDay->isMonday()) {
+                $mondays[] = $currentDay->toDateString();
+            }
+            // Avanzar al siguiente día
+            $currentDay->addDay();
+        }
+
+
+
         // Crear un período de fechas desde el inicio hasta el final del mes
-        $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
+        $planw = [
+            ['fecha' => '15/07/2024', 'cantidad' => 7402],
+            ['fecha' => '22/07/2024', 'cantidad' => 5786],
+            ['fecha' => '08/07/2024', 'cantidad' => 19612],
+            ['fecha' => '01/07/2024', 'cantidad' => 18680],
+            ['fecha' => '24/06/2024', 'cantidad' => 20394],
+            ['fecha' => '17/06/2024', 'cantidad' => 20686],
+            ['fecha' => '10/06/2024', 'cantidad' => 17356],
+            ['fecha' => '03/06/2024', 'cantidad' => 19492]
+
+        ];
         $dias = [];
         $datadia = [];
+        $length = count($mondays);
+        // $fechaplan=$planw->pluck('fecha');
+        foreach ($mondays as $index => $monday) {
+            $currentMonday = Carbon::parse($monday);
+
+            $nextMonday = ($index + 1 < $length) ? Carbon::parse($mondays[$index + 1]) : null;
+            if ($nextMonday) {
+                if ($nextMonday->lte(now())) {
+                    $currentMonday = Carbon::parse($monday);
+                    $fechaInicio = $currentMonday->format('d-m-Y') . ' 08:00:00';
+                    $fechaFin = $nextMonday->format('d-m-Y') . ' 8:00:00';
+                    $subQueryN = DB::connection('ultateck')->table('dbo.Historial_TRF2500')
+                        ->select('numeroContenedor_NumeroParteActual', DB::raw('MAX(eventoTRF_Id) as maxev'))
+                        ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+                        ->whereNotNull('contadorTotal_ProduccionReal')
+                        ->where('contadorTotal_ProduccionReal', '!=', 0)
+                        ->where('numeroContenedor_NombreParteActual', '!=', '')
+                        ->whereNotNull('numeroContenedor_NumeroParteActual')
+                        ->groupBy('numeroContenedor_NumeroParteActual');
+
+                    // Consulta principal que utiliza la subconsulta
+                    $producnoche = DB::connection('ultateck')->table('dbo.Historial_TRF2500')
+                        ->select(DB::raw('SUM(contadorTotal_ProduccionReal) as produc'))
+                        ->whereIn('eventoTRF_Id', $subQueryN->pluck('maxev'))
+                        ->first();
+                    $val = array_search($currentMonday->format('d/m/Y'), array_column($planw, 'fecha'));
+                    if ($val != false) {
+                        $plane = $planw[$val];
+                    } else {
+                        // dd('no encontro')
+                    }
+                    // foreach ($planw as $pw) {
+                    //     $recordDate = Carbon::createFromFormat('d/m/Y', $pw['fecha']);
+                    //     if ($recordDate->format('d/m/Y')==$currentMonday->format('d/m/Y')) {
+                    //         $plane=$pw['cantidad'];
+
+                    //         break;
+                    //     }
+                    // }
+                    $poducionok = 0;
+            $poducionno = 0;
+                    if(($producnoche->produc/5) < $plane['cantidad'])
+                    {
+                        $poducionno=$producnoche->produc;
+                    }else{
+                        $poducionok=$producnoche->produc;
+                    }
+                    $dataw = [
+                        "golpes" => ($poducionok / 5) ?? 0,
+                        "golpesno" =>($poducionno / 5) ?? 0,
+                        "diames" => $currentMonday->format('m') . ' ' . $index . "W /<br>" . $producnoche->produc,
+                        "plan" =>  $plane['cantidad'] ?? 0,
+                        "plan1" =>  $plane['cantidad'] + 1500 ?? 0
+                    ];
+                    array_push($dias,   $dataw);
+                } else {
+                    $startOfMonth = $monday;
+                }
+            } else {
+                $startOfMonth = $monday;
+            }
+        }
+
+
+        $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
         foreach ($period as $date) {
-
             $nextDay = $date->copy()->addDay();
+            $fechaInicio = $date->format('d-m-Y') . ' 08:00:00';
+            $fechaFin = $date->format('d-m-Y') . ' 20:06:00';
+            // Subconsulta para obtener los máximos eventoTRF_Id por numeroContenedor_NumeroParteActual
+            $subQuery = DB::connection('ultateck')->table('dbo.Historial_TRF2500')
+                ->select('numeroContenedor_NumeroParteActual', DB::raw('MAX(eventoTRF_Id) as maxev'))
+                ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+                ->whereNotNull('contadorTotal_ProduccionReal')
+                ->where('contadorTotal_ProduccionReal', '!=', 0)
+                ->where('numeroContenedor_NombreParteActual', '!=', '')
+                ->whereNotNull('numeroContenedor_NumeroParteActual')
+                ->groupBy('numeroContenedor_NumeroParteActual');
+            // Consulta principal que utiliza la subconsulta
+            $produc = DB::connection('ultateck')->table('dbo.Historial_TRF2500')
+                ->select(DB::raw('SUM(contadorTotal_ProduccionReal) as produc'))
+                ->whereIn('eventoTRF_Id', $subQuery->pluck('maxev'))
+                ->first();
+            $fechaInicio = $date->format('d/m/Y') . ' 20:06:00';
+            $fechaFin = $nextDay->format('d/m/Y') . ' 8:00:00';
+            $subQueryN = DB::connection('ultateck')->table('dbo.Historial_TRF2500')
+                ->select('numeroContenedor_NumeroParteActual', DB::raw('MAX(eventoTRF_Id) as maxev'))
+                ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+                ->whereNotNull('contadorTotal_ProduccionReal')
+                ->where('contadorTotal_ProduccionReal', '!=', 0)
+                ->where('numeroContenedor_NombreParteActual', '!=', '')
+                ->whereNotNull('numeroContenedor_NumeroParteActual')
+                ->groupBy('numeroContenedor_NumeroParteActual');
 
-
-            $sqldia= "
-            WITH CustomerCTE AS (
-                SELECT
-                    numeroContenedor_NumeroParteActual,
-                    MIN(eventoTRF_Id) AS evmin,
-                    MAX(eventoTRF_Id) AS maxev,
-                    MAX(contadorTotal_ProduccionReal) AS prod,
-                    MIN(contadorTotal_ProduccionReal) AS prodm,
-                    MAX(numeroContenedor_NombreParteActual) AS produ,
-                    MIN(fecha) AS inicio,
-                    MAX(fecha) AS fin
-                FROM [YKMPrensas].[dbo].[Historial_TRF2500]
-                WHERE (fecha > '" . $date->format('d/m/Y') . " 08:00:00' AND fecha < '" .  $date->format('d/m/Y') . " 20:06:00')
-                    AND contadorTotal_ProduccionReal IS NOT NULL
-                    AND contadorTotal_ProduccionReal != 0
-                    AND numeroContenedor_NombreParteActual != ''
-                    AND numeroContenedor_NumeroParteActual IS NOT NULL
-                GROUP BY numeroContenedor_NumeroParteActual
-            )
-            SELECT SUM(contadorTotal_ProduccionReal) AS produc
-            FROM [YKMPrensas].[dbo].[Historial_TRF2500]
-            WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
-            ";
-
-            $sqlnoche= "
-            WITH CustomerCTE AS (
-                SELECT
-                    numeroContenedor_NumeroParteActual,
-                    MIN(eventoTRF_Id) AS evmin,
-                    MAX(eventoTRF_Id) AS maxev,
-                    MAX(contadorTotal_ProduccionReal) AS prod,
-                    MIN(contadorTotal_ProduccionReal) AS prodm,
-                    MAX(numeroContenedor_NombreParteActual) AS produ,
-                    MIN(fecha) AS inicio,
-                    MAX(fecha) AS fin
-                FROM [YKMPrensas].[dbo].[Historial_TRF2500]
-                WHERE (fecha > '" . $date->format('d/m/Y') . " 20:06:00' AND fecha < '" .  $nextDay->format('d/m/Y') . " 08:00:00')
-                    AND contadorTotal_ProduccionReal IS NOT NULL
-                    AND contadorTotal_ProduccionReal != 0
-                    AND numeroContenedor_NombreParteActual != ''
-                    AND numeroContenedor_NumeroParteActual IS NOT NULL
-                GROUP BY numeroContenedor_NumeroParteActual
-            )
-            SELECT SUM(contadorTotal_ProduccionReal) AS produc
-            FROM [YKMPrensas].[dbo].[Historial_TRF2500]
-            WHERE eventoTRF_Id IN (SELECT maxev FROM CustomerCTE);
-            ";
-
-
-            $buscarfe=$planmes->where('Fecha', $date->format('Y-m-d'))->where('Turno','D');
-            $buscarfeN=$planmes->where('Fecha', $date->format('Y/m/d'))->where('Turno','N');
-            $resultdia = DB::connection('ultateck')->select($sqldia);
-            $resultnoche = DB::connection('ultateck')->select($sqlnoche);
-            $golpesdia = $resultdia[0];
-
-            $golpesnoche = $resultnoche[0];
-            if( $date->eq(now()->format('d-m-Y')))
-            {
-                $turnoact=$golpesdia->produc+$golpesnoche->produc;
+            // Consulta principal que utiliza la subconsulta
+            $producnoche = DB::connection('ultateck')->table('dbo.Historial_TRF2500')
+                ->select(DB::raw('SUM(contadorTotal_ProduccionReal) as produc'))
+                ->whereIn('eventoTRF_Id', $subQueryN->pluck('maxev'))
+                ->first();
+            $buscarfe = $planmes->where('Fecha', $date->format('Y-m-d'))->where('Turno', 'D');
+            $buscarfeN = $planmes->where('Fecha', $date->format('Y/m/d'))->where('Turno', 'N');
+            $poducionok = 0;
+            $poducionno = 0;
+            if ($produc->produc < $buscarfe->first()->total_acumulado) {
+                $poducionno = $produc->produc;
+            } else {
+                $poducionok =$produc->produc;
             }
             $datadia = [
-                "golpes" => $golpesdia->produc ?? 0,
-                "diames" => $date->format('d/m/Y'). " D",
-                "plan"=> $buscarfe->first()->total_acumulado ?? 0
+                "golpes" =>  $poducionok,
+                "golpesno" => $poducionno,
+                "diames" => $date->format('d/m') . " D /n" . $produc->produc,
+                "plan" => $buscarfe->first()->total_acumulado ?? 0,
+                "plan1" => $buscarfe->first()->total_acumulado +1500?? 0
             ];
             array_push($dias,  $datadia);
+            $poducionok = 0;
+            $poducionno = 0;
+            if ($producnoche->produc < $buscarfe->first()->total_acumulado) {
+                $poducionno =$producnoche->produc;
+            } else {
+                $poducionok = $producnoche->produc;
+            }
             $datano = [
-                "golpes" => $golpesnoche->produc ?? 0,
-                "diames" => $date->format('d/m/Y'). " N",
-                "plan"=> $buscarfe->first()->total_acumulado ?? 0
+                "golpes" => $poducionok,
+                "golpesno" => $poducionno,
+                "diames" => $date->format('d/m') . " N \n" . $producnoche->produc,
+                "plan" => $buscarfe->first()->total_acumulado ?? 0,
+                "plan1" => $buscarfe->first()->total_acumulado+1500?? 0
             ];
             array_push($dias,  $datano);
         }
 
 
-        return view('IOT.charts', compact('dataall', 'turnoant', 'turnoact', 'dias','contadorp'));
+
+
+
+
+        return view('IOT.charts', compact('dataall', 'turnoant',  'dias', 'contadorp'));
         // return view('IOT.charts');
     }
 

@@ -81,13 +81,15 @@ class RefreshDiv extends Component
             ->orderBy('Turno')
             ->get()->first();
 
+
         if ($contadorp) {
             $this->time = $date->format('d/m/Y');
             $this->produc = $contadorp->contadorTotal_ProduccionReal;
             $this->plandiag = $plandia;
             $this->turnoactg = $turnoact;
+            $this->item= $cleanedData;
             $this->totaldia = $total;
-            $this->canpart= $itemsqury->cantidad;
+            $this->canpart= $itemsqury->cantidad??0;
         } else {
             $this->time = 'No data found';
         }
