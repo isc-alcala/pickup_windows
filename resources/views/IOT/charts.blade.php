@@ -7,13 +7,13 @@
 
             </div>
         </div>
-        <div class="w-full max-h-100">
+        <div class="w-full max-h-100 pt-6">
             <p class="mb-4 font-semibold text-gray-800 dark:text-gray-300 text-2xl">
-              Grafica  Golpes Turno
+                Grafica Golpes Turno
             </p>
             <canvas id="bars1" height="50"></canvas>
         </div>
-        <div class="w-full max-h-100">
+        <div class="w-full max-h-100 pt-6">
             <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300 text-2xl">
                 Grafica Golpes Historico
             </h4>
@@ -22,15 +22,90 @@
 
 
     </div>
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var ctx1 = document.getElementById('bars2').getContext('2d');
+            var data1 = @json($dias); // Convertir los datos PHP a JSON
+            var dia = data1.map(item => item.diames);
+            var golpes = data1.map(item => item.golpes);
+            var golpesno = data1.map(item => item.golpesno);
+            var golpesplan = data1.map(item => item.plan);
+            var golpesplan1 = data1.map(item => item.plan1);
+
+            // Registro del plugin ChartDataLabels
+             Chart.register(ChartDataLabels);
+
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: dia,
+                    datasets: [{
+                            label: 'Golpes',
+                            backgroundColor: 'rgba(0, 128, 0, 0.5)', // Verde fuerte con opacidad
+                            borderColor: 'rgba(0, 128, 0, 1)', // Verde fuerte sin opacidad
+                            borderWidth: 1,
+                            data: golpes,
+                            stack: 'combined'
+                        },
+                        {
+                            label: 'No plan',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            data: golpesno,
+                            stack: 'combined'
+                        },
+                        {
+                            label: 'Requerimiento Int', // Etiqueta para los datos de la línea
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(0, 0, 128, 1)', // color azul
+                            borderWidth: 2,
+                            data: golpesplan,
+                            tension: 0
+                        },
+                        {
+                            label: 'Requerimiento Obj', // Etiqueta para los datos de la línea
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(255, 165, 0, 1)', // color naranja
+                            borderWidth: 2,
+                            data: golpesplan1,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    plugins: {
+                        datalabels: {
+                            color: 'black', // Color del texto de las etiquetas
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value, context) => {
+                                return value;
+                            },
+                            font: {
+                                weight: 'bold',
+                                size: 12 // Tamaño del texto de las etiquetas
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script> --}}
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var ctx = document.getElementById('bars1').getContext('2d');
-            var ctx1 = document.getElementById('bars2').getContext('2d');
             var data = @json($dataall); // Convertir los datos PHP a JSON
+            var ctx1 = document.getElementById('bars2').getContext('2d');
             var data1 = @json($dias); // Convertir los datos PHP a JSON
-
-            // Suponiendo que data tiene las propiedades 'label', 'shs', y 'bags'
 
             var modelo = data.map(item => item['hora']);
             var produccion = data.map(item => item.total_piezas);
@@ -44,7 +119,7 @@
                     datasets: [{
                             label: 'Golpes',
                             backgroundColor: 'rgba(0, 128, 0, 0.5)', // Verde fuerte con opacidad
-                            borderColor: 'rgba(0, 128, 0, 1)',       // Verde fuerte sin opacidad
+                            borderColor: 'rgba(0, 128, 0, 1)', // Verde fuerte sin opacidad
                             borderWidth: 1,
                             data: produccion,
                             stack: 'combined'
@@ -58,15 +133,13 @@
                             stack: 'combined'
                         },
                         {
-                            label: 'Plan', // Etiqueta para los datos de la línea
+                            label: 'Requerimiento Int', // Etiqueta para los datos de la línea
                             type: 'line',
                             fill: false,
 
-                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderColor: 'rgba(0, 0, 128, 1)',
                             borderWidth: 2,
                             data: lineData,
-
-
                         }
                     ]
                 },
@@ -74,17 +147,19 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-
-
                         }
                     }
-                }
+                },
             });
+
+
             var dia = data1.map(item => item.diames);
             var golpes = data1.map(item => item.golpes);
             var golpesno = data1.map(item => item.golpesno);
             var golpesplan = data1.map(item => item.plan);
             var golpesplan1 = data1.map(item => item.plan1);
+
+
             new Chart(ctx1, {
                 type: 'bar',
                 data: {
@@ -106,38 +181,33 @@
 
                         },
                         {
-                            label: 'Plan YKM', // Etiqueta para los datos de la línea
+                            label: 'Requerimiento Int', // Etiqueta para los datos de la línea
                             type: 'line',
                             fill: false,
-
-                            borderColor: 'rgba(0, 255, 255, 1)', // color amarillo
-
+                            borderColor: 'rgba(0, 0, 128, 1)', // color azul
                             borderWidth: 2,
                             data: golpesplan,
                             tension: 0
-
                         },
                         {
-                            label: 'Plan MMVO', // Etiqueta para los datos de la línea
+                            label: 'Requerimiento Obj', // Etiqueta para los datos de la línea
                             type: 'line',
                             fill: false,
-                            borderColor: 'rgba(255, 0, 255, 1)', // color amarillo
+                            borderColor: 'rgba(255, 165, 0, 1)', // color naranja
                             borderWidth: 2,
                             data: golpesplan1,
                             tension: 0
                         }
                     ]
-
                 },
                 options: {
+
 
                     scales: {
                         y: {
                             beginAtZero: true,
-
                         }
                     }
-
                 }
             });
         });

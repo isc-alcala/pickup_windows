@@ -67,6 +67,7 @@ class RefreshDiv extends Component
 
         $contadorp = DB::connection('ultateck')->table('Historial_TRF2500')->orderby('fecha', 'desc')->first();
         $cleanedData = str_replace("-", '', str_replace("\x00", '', $contadorp->numeroContenedor_NombreParteActual));
+
         $itemsqury = DB::table('planprensas')
             ->select(
                 'Fecha',
@@ -82,6 +83,8 @@ class RefreshDiv extends Component
             ->get()->first();
 
 
+            $evance=($plandia/10)*8;
+
         if ($contadorp) {
             $this->time = $date->format('d/m/Y');
             $this->produc = $contadorp->contadorTotal_ProduccionReal;
@@ -89,7 +92,7 @@ class RefreshDiv extends Component
             $this->turnoactg = $turnoact;
             $this->item= $cleanedData;
             $this->totaldia = $total;
-            $this->canpart= $itemsqury->cantidad??0;
+            $this->canpart= $evance??0;
         } else {
             $this->time = 'No data found';
         }

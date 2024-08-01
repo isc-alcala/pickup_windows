@@ -25,10 +25,10 @@ class IotController extends Controller
 
         $contadorp = DB::connection('ultateck')->table('Historial_TRF2500')->orderby('fecha', 'desc')->first();
         // dd($contadorp);
-        $sql2 = 'Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
-        FROM Planprensas
-        GROUP BY Fecha, Turno
-        ORDER BY Fecha, Turno;';
+        // $sql2 = 'Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
+        // FROM Planprensas
+        // GROUP BY Fecha, Turno
+        // ORDER BY Fecha, Turno;';
         $planmes = DB::table('planprensas')->select(DB::raw('Fecha, Turno, SUM(cantidad) AS total_acumulado'))
             ->groupBy('Fecha', 'Turno')
             ->orderBy('Fecha')
@@ -62,12 +62,12 @@ class IotController extends Controller
         $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 9:00:00');
         //  $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', '25/07/2024 21:00:00');
 
-        $PLANANT = 7200;
+        $PLANANT = 9000;
         $PLANAct = 12000;
         $SUMD = 0;
         $SUMN = 0;
-        $PLANHANT = $PLANANT / 12;
-        $PLANHACT = $PLANANT / 12;
+        $PLANHANT = $PLANANT / 10;
+        $PLANHACT = $PLANANT / 10;
         $PLAN = 0;
 
         foreach ($groupedResults as $result) {
@@ -105,7 +105,7 @@ class IotController extends Controller
             }
 
             $data = [
-                'hora' => $fechaFormateada,
+                'hora' =>$result['total_piezas'],
                 'total_piezas' => $result['total_piezas'],
                 'plan' => floor($PLAN),
                 'plan1' => floor($PLAN) + 100,
@@ -217,7 +217,7 @@ class IotController extends Controller
                     $dataw = [
                         "golpes" => ($poducionok / 5) ?? 0,
                         "golpesno" =>($poducionno / 5) ?? 0,
-                        "diames" => $currentMonday->format('m') . ' ' . $index . "W /<br>" . $producnoche->produc,
+                        "diames" => $currentMonday->format('m') . ' ' . $index . "W " . $producnoche->produc,
                         "plan" =>  $plane['cantidad'] ?? 0,
                         "plan1" =>  $plane['cantidad'] + 1500 ?? 0
                     ];
