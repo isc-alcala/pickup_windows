@@ -16,24 +16,22 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/tailwind.output.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
-    <script src="{{asset('js/charts-lines.js')}}" defer></script>
-    <script src="{{asset('js/charts-pie.js')}}" defer></script>
-    <script src="{{asset('js/charts-bars.js')}}" defer></script>
 
-    @livewireStyles
-    {{-- <script>
-        import Turbolinks from 'turbolinks';
-        Turbolinks.start()
-    </script> --}}
-
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs" defer></script>
-    <!-- Import ChartDataLabels plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-    <script src="{{asset('js/init-alpine.js')}}" defer></script>
 
+   <script src="{{ asset('js/charts-lines.js') }}" defer></script>
+   <script src="{{ asset('js/charts-pie.js') }}" defer></script>
+   <script src="{{ asset('js/charts-bars.js') }}" defer></script>
+
+   <!-- Estilos de Livewire -->
+   @livewireStyles
+   <script src="{{ asset('js/init-alpine.js') }}" defer></script>
+
+
+   <!-- Incluir Alpine.js -->
+   {{-- <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.6.0/dist/alpine.js" defer></script> --}}
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.bundle.js"></script>
 
 </head>
 

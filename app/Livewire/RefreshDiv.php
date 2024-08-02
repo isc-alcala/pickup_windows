@@ -14,6 +14,7 @@ class RefreshDiv extends Component
     public $totaldia;
     public $item;
     public $canpart;
+    public $contpieza;
     public function mount()
     {
         $this->updateTime();
@@ -83,7 +84,7 @@ class RefreshDiv extends Component
             ->get()->first();
 
 
-            $evance=($plandia/10)*8;
+            $evance=($plandia/10)*3;
 
         if ($contadorp) {
             $this->time = $date->format('d/m/Y');
@@ -93,6 +94,7 @@ class RefreshDiv extends Component
             $this->item= $cleanedData;
             $this->totaldia = $total;
             $this->canpart= $evance??0;
+
         } else {
             $this->time = 'No data found';
         }

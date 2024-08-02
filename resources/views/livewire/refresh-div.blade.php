@@ -80,8 +80,7 @@
                 <tr class="text-gray-700 dark:text-gray-400">
                     <td class="px-4 py-3">
                         <p class="font-semibold text-xl">
-                           PARTE ACTUAL
-                       </p>
+                           PARTE ACTUAL                       </p>
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex items-center text-sm">
@@ -92,7 +91,7 @@
                         </div>
                     </td>
                     <td class="px-4 py-3 text-2xl">
-                        <p class="font-semibold text-2xl"> </p>
+                        <p class="font-semibold text-xl">{{$produc}} </p>
                     </td>
                     <td class="px-4 py-3 text-2xl">
 
