@@ -12,6 +12,7 @@ use App\Models\ContactoDirecto;
 use App\Models\Relaciones;
 use App\Models\Truck;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PlanPrensaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,7 @@ Route::get('/', function () {
 Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
      Route::resource('dashboard', truckController::class);
      Route::resource('IOT', IotController::class);
+     Route::resource('IOTexcel', PlanPrensaController ::class);
      Route::get('/chart-data', [IotController::class, 'getDataForChart']);
     // // Route::view('/cliente/cliente', 'cliente.cliente')->name('cliente.cliente');
     Route::view('forms', 'forms')->name('forms');
@@ -46,6 +48,11 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
     Route::view('tables', 'tables')->name('tables');
     Route::view('calendar', 'calendar')->name('calendar');
 
+
+    Route::post('import', [PlanPrensaController::class, 'import']);
+    Route::post('import2', [PlanPrensaController::class, 'import2']);
+
+
     Route::resource('cliente', ClienteController::class);
     Route::resource('trucks', truckController::class);
     Route::resource('Estatus',EstatusController::class);
@@ -54,7 +61,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
     Route::resource('Contactodirecto', ContactoDirectoController::class);
     Route::resource('Relaciones', RelacionesController::class);
 
-
+    // Route::post('IOT.excel', [plancpController::class, 'index'])->name('IOT.index');
     Route::post('cliente.nuevo', [ClienteController::class, 'store'])->name('cliente.nuevo');
     Route::post('cliente.destroy', [ClienteController::class, 'destroyer'])->name('cliente.destroy');
     Route::post('carrier.nuevo', [CarrierController::class, 'store'])->name('carrier.nuevo');
