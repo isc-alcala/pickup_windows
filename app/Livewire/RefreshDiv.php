@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Livewire;
-
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -82,9 +82,16 @@ class RefreshDiv extends Component
             ->orderBy('Fecha')
             ->orderBy('Turno')
             ->get()->first();
+            $hora8AM = Carbon::today()->setTime(8, 0);
+
+            // Obtener la hora actual
+            $ahora = Carbon::now();
+
+            // Calcular la diferencia en horas
+            $horasTranscurridas = $ahora->diffInHours($hora8AM);
 
 
-            $evance=($plandia/10)*3;
+            $evance=($plandia/10)*$horasTranscurridas;
 
         if ($contadorp) {
             $this->time = $date->format('d/m/Y');

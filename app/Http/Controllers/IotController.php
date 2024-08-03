@@ -61,24 +61,37 @@ class IotController extends Controller
         // $fechaConHora = Carbon::createFromFormat('d/m/Y H:i:s','25/07/2024 21:00:00');
         $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 9:00:00');
         //  $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', '25/07/2024 21:00:00');
+$date1=now();
+
+        $platurno = DB::table('planprensas')->select(DB::raw('Fecha, Turno, SUM(cantidad) AS total_acumulado'))
+        ->groupBy('Fecha', 'Turno')
+        ->where('Fecha', '=', $date1->format('d/m/Y'))
+        ->where('Turno', '=', 'D')
+        ->orderBy('Fecha')
+        ->orderBy('Turno')
+        ->get()->first();
+
 
         $PLANANT = 9000;
-        $PLANAct = 12000;
+        $PLANAct = $platurno->total_acumulado;
+
+
+
         $SUMD = 0;
         $SUMN = 0;
         $PLANHANT = $PLANANT / 10;
-        $PLANHACT = $PLANANT / 10;
+        $PLANHACT = $PLANAct / 10;
         $PLAN = 0;
 
         foreach ($groupedResults as $result) {
 
             if ($fechaConHoraplan->lte($result['hora'])) {
                 $SUMN = 0;
-                $SUMD += $PLANHANT;
+                $SUMD += $PLANHACT;
                 $PLAN = $SUMD;
             } else {
                 $SUMD = 0;
-                $SUMN += $PLANHACT;
+                $SUMN += $PLANHANT;
                 $PLAN = $SUMN;
             }
 
@@ -105,7 +118,7 @@ class IotController extends Controller
             }
 
             $data = [
-                'hora' =>$result['total_piezas'],
+                'hora' => $fechaOriginal->format('d/m H').'hrs',
                 'total_piezas' => $result['total_piezas'],
                 'plan' => floor($PLAN),
                 'plan1' => floor($PLAN) + 100,
@@ -150,7 +163,6 @@ class IotController extends Controller
             // Avanzar al siguiente día
             $currentDay->addDay();
         }
-
 
 
         // Crear un período de fechas desde el inicio hasta el final del mes
@@ -207,16 +219,15 @@ class IotController extends Controller
                     //     }
                     // }
                     $poducionok = 0;
-            $poducionno = 0;
-                    if(($producnoche->produc/5) < $plane['cantidad'])
-                    {
-                        $poducionno=$producnoche->produc;
-                    }else{
-                        $poducionok=$producnoche->produc;
+                    $poducionno = 0;
+                    if (($producnoche->produc / 5) < $plane['cantidad']) {
+                        $poducionno = $producnoche->produc;
+                    } else {
+                        $poducionok = $producnoche->produc;
                     }
                     $dataw = [
                         "golpes" => ($poducionok / 5) ?? 0,
-                        "golpesno" =>($poducionno / 5) ?? 0,
+                        "golpesno" => ($poducionno / 5) ?? 0,
                         "diames" => $currentMonday->format('m') . ' ' . $index . "W " . $producnoche->produc,
                         "plan" =>  $plane['cantidad'] ?? 0,
                         "plan1" =>  $plane['cantidad'] + 1500 ?? 0
@@ -273,20 +284,20 @@ class IotController extends Controller
             if ($produc->produc < $buscarfe->first()->total_acumulado) {
                 $poducionno = $produc->produc;
             } else {
-                $poducionok =$produc->produc;
+                $poducionok = $produc->produc;
             }
             $datadia = [
                 "golpes" =>  $poducionok,
                 "golpesno" => $poducionno,
                 "diames" => $date->format('d/m') . " D /n" . $produc->produc,
                 "plan" => $buscarfe->first()->total_acumulado ?? 0,
-                "plan1" => $buscarfe->first()->total_acumulado +1500?? 0
+                "plan1" => $buscarfe->first()->total_acumulado + 1500 ?? 0
             ];
             array_push($dias,  $datadia);
             $poducionok = 0;
             $poducionno = 0;
             if ($producnoche->produc < $buscarfe->first()->total_acumulado) {
-                $poducionno =$producnoche->produc;
+                $poducionno = $producnoche->produc;
             } else {
                 $poducionok = $producnoche->produc;
             }
@@ -295,7 +306,7 @@ class IotController extends Controller
                 "golpesno" => $poducionno,
                 "diames" => $date->format('d/m') . " N \n" . $producnoche->produc,
                 "plan" => $buscarfe->first()->total_acumulado ?? 0,
-                "plan1" => $buscarfe->first()->total_acumulado+1500?? 0
+                "plan1" => $buscarfe->first()->total_acumulado + 1500 ?? 0
             ];
             array_push($dias,  $datano);
         }
