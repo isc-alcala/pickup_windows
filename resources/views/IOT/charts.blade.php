@@ -1,93 +1,315 @@
 <x-app-layout title="Charts">
     <div class="container grid px-6 mx-auto">
 
+        <div class="w-full max-h-180">
+            <div class="w-full overflow-x-auto">
+                @livewire('refresh-div')
 
-                <h4 class= "mb-4 font-semibold text-gray-600 dark:text-gray-300">
-                    PRODUCCION
-                </h4>
-                <div class="w-full max-h-180">
-                    <div class="w-full overflow-x-auto">
-                        <table class="w-full whitespace-no-wrap">
-                            <thead>
-                                <tr
-                                    class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
-                                    <th class="px-4 py-3">PLAN</th>
-                                    <th class="px-4 py-3">ACTUAL</th>
-                                    <th class="px-4 py-3">DIFERENCA</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-                                <tr class="text-gray-700 dark:text-gray-400">
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center text-sm">
-                                            <!-- Avatar with inset shadow -->
-
-                                            <div>
-                                                <p class="font-semibold">15000</p>
-
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        {{ $turnoact }}
-                                    </td>
-                                    <td class="px-4 py-3 text-xs">
-                                        <span
-                                            class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
-                                            5000
-                                        </span>
-                                    </td>
-                                </tr>
-                                <tr class="text-gray-700 dark:text-gray-400">
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center text-sm">
-                                            <!-- Avatar with inset shadow -->
-
-                                            <div>
-                                                <p class="font-semibold">13000</p>
-
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">
-                                        {{ $turnoant }}
-                                    </td>
-                                    <td class="px-4 py-3 text-xs">
-                                        <span
-                                            class="px-2 py-1 font-semibold leading-tight text-orange-700 bg-orange-100 rounded-full dark:text-white dark:bg-orange-600">
-                                            30000
-                                        </span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="w-full max-h-100">
-                    <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
-                        Grafica golpes
-                    </h4>
-                    <canvas id="bars1" height="50" ></canvas>
-                </div>
-                <div class="w-full max-h-100">
-                    <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
-                        Grafica golpes
-                    </h4>
-                    <canvas id="bars2" height="50"></canvas>
-                </div>
+            </div>
+        </div>
+        <div class="w-full max-h-100 pt-6">
+            <p class="mb-4 font-semibold text-gray-800 dark:text-gray-300 text-2xl">
+                Grafica Golpes Turno
+            </p>
+            <canvas id="bars1" height="50"></canvas>
+        </div>
+        <div class="w-full max-h-100 pt-6">
+            <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300 text-2xl">
+                Grafica Golpes Historico
+            </h4>
+            <canvas id="bars2" height="50"></canvas>
+        </div>
+        {{-- <div class="w-full max-h-100 pt-6">
+            <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300 text-2xl">
+                Grafica Golpes Historico
+            </h4>
+            <canvas id="bars3" height="50"></canvas>
+        </div> --}}
 
 
     </div>
 
+    {{-- <script>
+        var ctx = document.getElementById("bars3");
+        debugger;
+        var data = {
+            labels: ["2 Jan", "9 Jan", "16 Jan", "23 Jan", "30 Jan", "6 Feb", "13 Feb"],
+            datasets: [{
+                data: [150, 87, 56, 50, 88, 60, 45],
+                backgroundColor: "#4082c4"
+            }]
+        }
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: {
+                "hover": {
+                    "animationDuration": 0
+                },
+                "animation": {
+                    "duration": 1,
+                    "onComplete": function() {
+                        var chartInstance = this.chart,
+                            ctx = chartInstance.ctx;
+
+                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart
+                            .defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+
+                        this.data.datasets.forEach(function(dataset, i) {
+                            var meta = chartInstance.controller.getDatasetMeta(i);
+                            meta.data.forEach(function(bar, index) {
+                                var data = dataset.data[index];
+                                ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                            });
+                        });
+                    }
+                },
+                legend: {
+                    "display": false
+                },
+                tooltips: {
+                    "enabled": false
+                },
+                scales: {
+                    yAxes: [{
+                        display: false,
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            max: Math.max(...data.datasets[0].data) + 10,
+                            display: false,
+                            beginAtZero: true
+                        }
+                    }],
+                    xAxes: [{
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script> --}}
     <script>
+        var ctx = document.getElementById('bars1').getContext('2d');
+        var datacontroller = @json($dataall); // Convertir los datos PHP a JSON
+
+
+        var modelo = datacontroller.map(item => item['hora']);
+        var produccion = datacontroller.map(item => item.total_piezas);
+        var bagsData = datacontroller.map(item => item.bags);
+        var lineData = datacontroller.map(item => item.plan);
+        var dif = datacontroller.map(item => item.dif);
+        var maxValue = Math.max(
+            Math.max(...produccion),
+            Math.max(...dif)
+        );
+
+        var datagarf1 = {
+            labels: modelo,
+            datasets: [{
+                    label: 'Golpes',
+                    backgroundColor: 'rgba(0, 128, 0, 0.5)', // Verde fuerte con opacidad
+                    borderColor: 'rgba(0, 128, 0, 1)', // Verde fuerte sin opacidad
+                    borderWidth: 1,
+                    data: produccion,
+                    stack: 'combined'
+                },
+                {
+                    label: 'Diferencia',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    data: dif,
+                    stack: 'combined'
+                },
+                {
+                    label: 'Requerimiento Int', // Etiqueta para los datos de la línea
+                    type: 'line',
+                    fill: false,
+
+                    borderColor: 'rgba(0, 0, 128, 1)',
+                    borderWidth: 2,
+                    data: lineData,
+                }
+            ]
+        };
+        var myChart2 = new Chart(ctx, {
+            type: 'bar',
+            data: datagarf1,
+            options: {
+                animation: {
+                    onComplete: function() {
+                        var chartInstance = this.chart,
+                            ctx = chartInstance.ctx;
+
+                        ctx.font = Chart.helpers.fontString(
+                            Chart.defaults.global.defaultFontSize,
+                            Chart.defaults.global.defaultFontStyle,
+                            Chart.defaults.global.defaultFontFamily
+                        );
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillStyle = 'black'; // Asegurando que el color del texto sea negro
+
+
+                        this.data.datasets.forEach(function(dataset, i) {
+                            // Verifica si el tipo de dataset es 'bar'
+                            if (dataset.label === 'Golpes') { // Solo mostrar valores de la barra verde
+                                var meta = chartInstance.controller.getDatasetMeta(i);
+                                meta.data.forEach(function(bar, index) {
+                                    var data = dataset.data[index];
+
+
+                                    ctx.fillText(data, bar._model.x, bar._model.y - 10);
+                                });
+                            }
+                        });
+                    }
+                },
+
+                tooltips: {
+                    enabled: false
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        display: false,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'black',
+                            display: false
+                        }
+                    },
+                }
+            }
+        });
+    </script>
+    <script>
+        var ctx1 = document.getElementById('bars2').getContext('2d');
+        var data1 = @json($dias); // Convertir los datos PHP a JSON
+        var dia = data1.map(item => item.diames);
+        var golpes = data1.map(item => item.golpes);
+        var golpesno = data1.map(item => item.golpesno);
+        var golpesplan = data1.map(item => item.plan);
+        var golpesplan1 = data1.map(item => item.plan1);
+
+
+
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: dia,
+                datasets: [{
+                        label: 'Golpes',
+                        backgroundColor: 'rgba(0, 128, 0, 0.5)', // Verde fuerte con opacidad
+                        borderColor: 'rgba(0, 128, 0, 1)', // Verde fuerte sin opacidad
+                        borderWidth: 1,
+                        data: golpes,
+                        stack: 'combined'
+
+                    },
+                    {
+                        label: 'No plan',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        data: golpesno,
+                        stack: 'combined'
+
+                    },
+                    {
+                        label: 'Requerimiento Int', // Etiqueta para los datos de la línea
+                        type: 'line',
+                        fill: false,
+                        borderColor: 'rgba(0, 0, 128, 1)', // color azul
+                        borderWidth: 2,
+                        data: golpesplan,
+                        tension: 0
+                    },
+                    {
+                        label: 'Requerimiento Obj', // Etiqueta para los datos de la línea
+                        type: 'line',
+                        fill: false,
+                        borderColor: 'rgba(255, 165, 0, 1)', // color naranja
+                        borderWidth: 2,
+                        data: golpesplan1,
+                        tension: 0
+                    }
+                ]
+            },
+            options: {
+                animation: {
+                    onComplete: function() {
+                        var chartInstance = this.chart,
+                            ctx = chartInstance.ctx;
+
+                        ctx.font = Chart.helpers.fontString(
+                            Chart.defaults.global.defaultFontSize,
+                            Chart.defaults.global.defaultFontStyle,
+                            Chart.defaults.global.defaultFontFamily
+                        );
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillStyle = 'black'; // Asegurando que el color del texto sea negro
+
+
+                        this.data.datasets.forEach(function(dataset, i) {
+                            // Verifica si el tipo de dataset es 'bar'
+                            if (dataset.label === 'Golpes' || dataset.label ===
+                                'No plan') { // Solo mostrar valores de la barra verde
+                                var meta = chartInstance.controller.getDatasetMeta(i);
+                                meta.data.forEach(function(bar, index) {
+
+                                    var data = dataset.data[index];
+
+
+                                    ctx.fillText(data, bar._model.x, bar._model.y - 10);
+                                });
+                            }
+                        });
+                    }
+                },
+
+                tooltips: {
+                    enabled: false
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        display: false,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'black',
+                            display: false
+                        }
+                    },
+                }
+            }
+
+        });
+    </script>
+
+
+
+    {{-- funcional --}}
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', function() {
             var ctx = document.getElementById('bars1').getContext('2d');
             var ctx1 = document.getElementById('bars2').getContext('2d');
             var data = @json($dataall); // Convertir los datos PHP a JSON
+            var ctx1 = document.getElementById('bars2').getContext('2d');
             var data1 = @json($dias); // Convertir los datos PHP a JSON
-
-
-            // Suponiendo que data tiene las propiedades 'label', 'shoes', y 'bags'
 
             var modelo = data.map(item => item['hora']);
             var produccion = data.map(item => item.total_piezas);
@@ -100,8 +322,8 @@
                     labels: modelo,
                     datasets: [{
                             label: 'Golpes',
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(0, 128, 0, 0.5)', // Verde fuerte con opacidad
+                            borderColor: 'rgba(0, 128, 0, 1)', // Verde fuerte sin opacidad
                             borderWidth: 1,
                             data: produccion,
                             stack: 'combined'
@@ -115,14 +337,13 @@
                             stack: 'combined'
                         },
                         {
-                            label: 'Plan', // Etiqueta para los datos de la línea
+                            label: 'Requerimiento Int', // Etiqueta para los datos de la línea
                             type: 'line',
                             fill: false,
 
-                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderColor: 'rgba(0, 0, 128, 1)',
                             borderWidth: 2,
                             data: lineData,
-
                         }
                     ]
                 },
@@ -130,11 +351,61 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-
-
                         }
                     }
-                }
+                },
+            });
+
+
+            var dia = data1.map(item => item.diames);
+            var golpes = data1.map(item => item.golpes);
+            var golpesno = data1.map(item => item.golpesno);
+            var golpesplan = data1.map(item => item.plan);
+            var golpesplan1 = data1.map(item => item.plan1);
+
+
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: dia,
+                    datasets: [{
+                            label: 'Golpes',
+                            backgroundColor: 'rgba(0, 128, 0, 0.5)', // Verde fuerte con opacidad
+                            borderColor: 'rgba(0, 128, 0, 1)', // Verde fuerte sin opacidad
+                            borderWidth: 1,
+                            data: golpes,
+
+                        },
+                        {
+                            label: 'No plan',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            data: golpesno,
+
+                        },
+                        {
+                            label: 'Requerimiento Int', // Etiqueta para los datos de la línea
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(0, 0, 128, 1)', // color azul
+                            borderWidth: 2,
+                            data: golpesplan,
+                            tension: 0
+                        },
+                        {
+                            label: 'Requerimiento Obj', // Etiqueta para los datos de la línea
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(255, 165, 0, 1)', // color naranja
+                            borderWidth: 2,
+                            data: golpesplan1,
+                            tension: 0
+                        }
+                    ]
+                },
+
+
             });
             var dia = data1.map(item => item.diames);
             var golpes = data1.map(item => item.golpes);
@@ -164,5 +435,9 @@
                 }
             });
         });
-    </script>
+    </script> --}}
+
+
+    </body>
+
 </x-app-layout>
