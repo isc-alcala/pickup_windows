@@ -28,7 +28,7 @@ use App\Http\Controllers\PlanPrensaController;
 Route::get('/', function () {
     return view('welcome');
 });
-
+Route::resource('p2500', IotController::class);
 // Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
 //     return view('dashboard');
 // })->name('dashboard');

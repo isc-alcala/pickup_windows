@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 
+
 class IotController extends Controller
 {
     /**
@@ -19,36 +20,147 @@ class IotController extends Controller
 
         $formattedDate = Carbon::now()->setTime(20, 6)->format('Y-m-d H:i');
         $seleccionturno = Carbon::now()->format('Y-m-d H:i');
+        $formattedDate1 = Carbon::now()->setTime(20, 6);
+        $formattedDate2 = Carbon::now()->setTime(8, 0);
+        $banderatur = 0;
+        $seleccionturno1 = Carbon::now();
+
+
+        // dd($formattedDate,$seleccionturno );
         $matution = [];
         $nocturno = [];
-        $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500');
+        // $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500');
+        //    dd($seleccionturno1->lte($formattedDate1) ,  !$formattedDate2->lte($seleccionturno1));
 
-        $contadorp = DB::connection('ultateck')->table('Historial_TRF2500')->orderby('fecha', 'desc')->first();
-        // dd($contadorp);
-        // $sql2 = 'Fecha, Turno, SUM(Plan_produccion) AS total_acumulado
-        // FROM Planprensas
-        // GROUP BY Fecha, Turno
-        // ORDER BY Fecha, Turno;';
+        if ($seleccionturno1->gte($formattedDate1)) {
+
+            $formattedDate = Carbon::now()->setTime(20, 06)->format('Y-m-d H:i');
+            $seleccionturno = Carbon::now()->format('Y-m-d H:i');
+            // dd('noche1',$seleccionturno1->lte($formattedDate1),$seleccionturno1,$formattedDate1);
+            $fechaInicio = Carbon::now()->setTime(8, 06);
+            $cambiot = Carbon::now()->setTime(20, 06)->format('Y-m-d H');
+            $fechaFin = Carbon::now()->addDay()->setTime(8, 0);
+            //  dd($seleccionturno1->lte($formattedDate1),$seleccionturno1,$formattedDate1 );
+        } else {
+
+            if ($seleccionturno1->lte($formattedDate2)) {
+                $formattedDate = Carbon::now()->subDay()->setTime(8, 06)->format('Y-m-d H:i');
+                $seleccionturno = Carbon::now()->format('Y-m-d H:i');
+                $cambiot = Carbon::now()->setTime(20, 06)->format('Y-m-d H:');
+                $fechaInicio = Carbon::now()->subDay()->setTime(8, 6);
+                $fechaFin = Carbon::now()->setTime(8, 0);
+            } else {
+                $formattedDate = Carbon::now()->subDay()->setTime(8, 0)->format('Y-m-d H:i');
+                $seleccionturno = Carbon::now()->format('Y-m-d H:i');
+                $fechaInicio = Carbon::now()->subDay()->setTime(20, 6);
+                $cambiot = Carbon::now()->setTime(8, 06)->format('Y-m-d H');
+                $fechaFin = Carbon::now()->setTime(20, 6);
+                $banderatur=1;
+            }
+        }
+
+
+        $subQuery = DB::connection('ultateck')->table('Historial_TRF2500')
+            ->select(
+                DB::raw('MAX(eventoTRF_Id) as idm'),
+                DB::raw("FORMAT(fecha, 'yyyy-MM-dd HH') AS FechaHora"),
+                'numeroContenedor_NombreParteActual'
+            )
+            ->where('fecha', '>=', $fechaInicio->format('d-m-Y H:m:s'))
+            ->where('fecha', '<=', $fechaFin->format('d-m-Y H:m:s'))
+            ->where('numeroContenedor_NombreParteActual', '!=', '')
+            ->where('contadorTotal_ProduccionReal', '!=', 0)
+            ->groupBy('numeroContenedor_NombreParteActual', DB::raw("FORMAT(fecha, 'yyyy-MM-dd HH')"));
+
+        $result = DB::connection('ultateck')->table('Historial_TRF2500 as h')
+            ->joinSub($subQuery, 'subq2', function ($join) {
+                $join->on('h.eventoTRF_Id', '=', 'subq2.idm');
+            })
+            ->select(
+                'subq2.idm',
+                'h.eventoTRF_Id',
+                'h.contadorTotal_ProduccionReal',
+                'subq2.FechaHora',
+                'h.fecha',
+                'h.numeroContenedor_NumeroParteActual',
+                'h.numeroContenedor_NombreParteActual'
+            )
+            ->orderBy('h.fecha')
+            ->get();
+
+        $arrgr = [];
+        $arrtotal = [];
+        $hora = [];
+        $part = 0;
+        $cat = 0;
+        $numero = 0;
+        $partant = 0;
+        $cantant = 0;
+        $fec = 0;
+        foreach ($result as $res) {
+            $cat = $res->contadorTotal_ProduccionReal;
+
+            $horaf = Carbon::createFromFormat('Y-m-d H', $res->FechaHora);
+            $hora = $horaf->format('d-m-Y H');
+            if (empty($arrtotal)) {
+                $partant = $res->numeroContenedor_NombreParteActual;
+                $cantant = $res->contadorTotal_ProduccionReal;
+                $arrgr = ['hora' => $hora, 'cantidad' => $cat];
+                array_push($arrtotal, $arrgr);
+            } else {
+                $part = $res->numeroContenedor_NombreParteActual;
+                // dd($arrgr[count($arrgr)-1]);
+                $ultimoElemento = end($arrtotal);
+                $ultimokey = key($arrtotal);
+                // dd( $ultimoElemento);
+
+                if ($ultimoElemento['hora'] == $hora) {
+
+                    $cat = $cat + $ultimoElemento['cantidad'];
+                    $arrgr = ['hora' => $hora, 'cantidad' => $cat];
+                    $arrtotal[$ultimokey] = $arrgr;
+                } else {
+
+                    if ($part == $partant) {
+
+                        $cat = $cat - $cantant;
+                        // dd( $cat,$cantant, $res->contadorTotal_ProduccionReal);
+                    } else {
+
+                        $cat = $cat + $ultimoElemento['cantidad'];
+                        // dd($ultimoElemento['hora'], $hora,$arrgr,$arrtotal,$result,$part,$partant,$cat,$cantant);
+                    }
+                    // dd($hora, $part,$partant, $res->contadorTotal_ProduccionReal);
+
+                    $arrgr = ['hora' => $hora, 'cantidad' => $cat];
+                    array_push($arrtotal, $arrgr);
+                }
+                $partant = $res->numeroContenedor_NombreParteActual;
+                $cantant = $res->contadorTotal_ProduccionReal;
+            }
+        }
+
+
+        // dd($fechaInicio->format('d-m-Y H:m:s'),$fechaFin->format('d-m-Y H:m:s'));
+        // $data = DB::connection('ultateck')->select('EXEC web_dashboard_actual_trf2500');
+        // $collection = collect($data);
+        // $groupedResults = $collection->groupBy(function ($item) {
+        //     return date('H', strtotime($item->fecha));
+        // })->map(function ($hourlyData) {
+        //     return [
+        //         'total_piezas' => $hourlyData->sum('produccion'),
+        //         'hora' => $hourlyData->max('fecha'),
+        //     ];
+        // });
+
+
+
         $planmes = DB::table('planprensas')->select(DB::raw('Fecha, Turno, SUM(cantidad) AS total_acumulado'))
             ->groupBy('Fecha', 'Turno')
             ->orderBy('Fecha')
             ->orderBy('Turno')
             ->get();
 
-        // $plandia=$planmes->where('Fecha', now()->format('Y-m-d'))->sum('total_acumulado');
-
-
-        // $contador=DB::connection('ultateck')->select('Historial_TRF2500', []);
-        $collection = collect($data);
-        // Si necesitas agrupar los resultados por hora y sumar las piezas
-        $groupedResults = $collection->groupBy(function ($item) {
-            return date('H', strtotime($item->fecha));
-        })->map(function ($hourlyData) {
-            return [
-                'total_piezas' => $hourlyData->sum('produccion'),
-                'hora' => $hourlyData->max('fecha'),
-            ];
-        });
 
 
 
@@ -61,77 +173,142 @@ class IotController extends Controller
         // $fechaConHora = Carbon::createFromFormat('d/m/Y H:i:s','25/07/2024 21:00:00');
         $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', $hoy . ' 9:00:00');
         //  $fechaConHoraplan = Carbon::createFromFormat('d/m/Y H:i:s', '25/07/2024 21:00:00');
-$date1=now();
 
+
+        $date1 = now();
+        // dd( $fechaInicio->format('d/m/Y'), $fechaFin->format('d/m/Y'));
         $platurno = DB::table('planprensas')->select(DB::raw('Fecha, Turno, SUM(cantidad) AS total_acumulado'))
-        ->groupBy('Fecha', 'Turno')
-        ->where('Fecha', '=', $date1->format('d/m/Y'))
-        ->where('Turno', '=', 'D')
-        ->orderBy('Fecha')
-        ->orderBy('Turno')
-        ->get()->first();
+            ->groupBy('Fecha', 'Turno')
+            ->where('Fecha', '>=', $fechaInicio->format('d/m/Y'))
+            ->where('Fecha', '<=', $fechaFin->format('d/m/Y'))
+            ->orderBy('Fecha')
+            ->orderBy('Turno')
+            ->get();
+
+            if($banderatur==1)
+            {
+                $tunroanterior = $platurno->where('Fecha', $fechaInicio->format('Y-m-d'))->where('Turno', 'N')->first();
+                $turnoactual =  $platurno->where('Fecha', $fechaFin->format('Y-m-d'))->where('Turno', 'D')->first();
+
+            }else
+            {
+                $tunroanterior = $platurno->where('Fecha', $fechaInicio->format('Y-m-d'))->where('Turno', 'D')->first();
+                $turnoactual  =  $platurno->where('Fecha', $fechaFin->format('Y-m-d'))->where('Turno', 'N')->first();
+            }
 
 
-        $PLANANT = 9000;
-        $PLANAct = $platurno->total_acumulado;
+        $produccionacu = 0;
 
-
-
+        // $PLANAct = $platurno->total_acumulado;
+        $PLANANT =   $tunroanterior->total_acumulado;
+        $PLANAct = $turnoactual  ->total_acumulado;
         $SUMD = 0;
         $SUMN = 0;
         $PLANHANT = $PLANANT / 10;
         $PLANHACT = $PLANAct / 10;
         $PLAN = 0;
+        $dataall = [];
+        $bant = 0;
 
-        foreach ($groupedResults as $result) {
-
-            if ($fechaConHoraplan->lte($result['hora'])) {
-                $SUMN = 0;
-                $SUMD += $PLANHACT;
-                $PLAN = $SUMD;
-            } else {
-                $SUMD = 0;
-                $SUMN += $PLANHANT;
-                $PLAN = $SUMN;
+        while ($fechaInicio->lte($fechaFin)) {
+            if ($fechaInicio->format('Y-m-d H') == $cambiot) {
+                $produccionacu = 0;
+                $PLAN = 0;
+                $bant = 1;
             }
+            if ($bant == 0) {
+                $PLAN = $PLAN + $PLANHANT;
+            } else {
+                $PLAN = $PLAN + $PLANHACT;
+            }
+            // $arrtota arrglo de produccion
+            $valF = array_search($fechaInicio->format('d-m-Y H'), array_column($arrtotal, 'hora'));
+            // dd($arrtotal,$fechaInicio->format('Y-m-d H'),$valF);
+            $cantidad = $arrtotal[$valF];
+            if ($valF !== false) {
+                $produccionacu = $produccionacu + $cantidad['cantidad'];
+                $res = $produccionacu - $PLAN;
 
-            $fechaOriginal = Carbon::parse($result['hora']);
-
-            $fechaFormateada = $fechaOriginal->format('d/m H');
-
-            if ($result['hora'])
-
-                if ($fechaConHora->eq($result['hora'])) {
-
-                    $turnoant = $result['total_piezas'];
+                if ($produccionacu < floor($PLAN)) {
+                    $res = $res * -1;
                 } else {
-                    if ($result['total_piezas'] != 0) {
-                        $turnoact = $result['total_piezas'];
-                    }
+                    $rest = 0;
                 }
-
-            $rest = $result['total_piezas'] - floor($PLAN);
-            if ($result['total_piezas'] < floor($PLAN)) {
-                $rest = $rest * -1;
+                $data = ["hora" => $fechaInicio->format('d-m H') . 'hrs', 'total_piezas' => $produccionacu, 'plan' => $PLAN, 'dif' => $res];
             } else {
-                $rest = 0;
+                // dd($valF ,$fechaInicio->format('Y-m-d hh'), array_column($arrtotal, 'hora'),now()->lte($fechaInicio),now(),$fechaInicio,$dataall);
+                if (now()->lte($fechaInicio)) {
+                    $res = $PLAN;
+
+                    $data = ["hora" => $fechaInicio->format('d-m H') . 'hrs', 'total_piezas' => 0, 'plan' => $PLAN, 'dif' => $res];
+                } else {
+                    $res = $produccionacu - $PLAN;
+                    if ($produccionacu < floor($PLAN)) {
+                        $res = $res * -1;
+                    } else {
+                        $rest = 0;
+                    }
+                    $data = ["hora" => $fechaInicio->format('d-m H') . 'hrs', 'total_piezas' => $produccionacu, 'plan' => $PLAN, 'dif' => $res];
+                }
             }
 
-            $data = [
-                'hora' => $fechaOriginal->format('d/m H').'hrs',
-                'total_piezas' => $result['total_piezas'],
-                'plan' => floor($PLAN),
-                'plan1' => floor($PLAN) + 100,
-                'dif' => $rest,
-            ];
+            // $data=[ "fecha"=>$fechaInicio->format('d-m-Y H:i:s'),'produccion'=> $produccionacu];
             array_push($dataall, $data);
+            // Incrementar la fecha en 1 día
+            $fechaInicio->addHour();;
         }
+
+        //         'hora' => $fechaFormateada . ' hras',
+        //         'total_piezas' => $result['total_piezas'],
+        //         'plan' => floor($PLAN),
+        //         'plan1' => floor($PLAN) + 100,
+        //         'dif' => $rest,
+        //     ];
+
+        // foreach ($groupedResults as $result) {
+        //     if ($fechaConHoraplan->lte($result['hora'])) {
+        //         $SUMN = 0;
+        //         $SUMD += $PLANHANT;
+        //         $PLAN = $SUMD;
+        //     } else {
+        //         $SUMD = 0;
+        //         $SUMN += $PLANHACT;
+        //         $PLAN = $SUMN;
+        //     }
+        //     $fechaOriginal = Carbon::parse($result['hora']);
+        //     $fechaFormateada = $fechaOriginal->format('d/m H');
+        //     if ($result['hora'])
+
+        //         if ($fechaConHora->eq($result['hora'])) {
+
+        //             $turnoant = $result['total_piezas'];
+        //         } else {
+        //             if ($result['total_piezas'] != 0) {
+        //                 $turnoact = $result['total_piezas'];
+        //             }
+        //         }
+
+        //     $rest = $result['total_piezas'] - floor($PLAN);
+        //     if ($result['total_piezas'] < floor($PLAN)) {
+        //         $rest = $rest * -1;
+        //     } else {
+        //         $rest = 0;
+        //     }
+
+        //     $data = [
+        //         'hora' => $fechaFormateada . ' hras',
+        //         'total_piezas' => $result['total_piezas'],
+        //         'plan' => floor($PLAN),
+        //         'plan1' => floor($PLAN) + 100,
+        //         'dif' => $rest,
+        //     ];
+        //     array_push($dataall, $data);
+        // }
 
 
         $year = 2024;
         $month = 7;
         $monthback = 6;
-
         // Crear una fecha inicial y una fecha final para el mes especificado
         $startOfMonthback = Carbon::create($year, $monthback, 1);
         $endOfMonthback = $startOfMonthback->copy()->endOfMonth();
@@ -151,7 +328,6 @@ $date1=now();
 
 
         // Array para almacenar los lunes del mes
-
 
         // Iterar a través de cada día del mes
         $currentDay = $startOfMonth->copy();
@@ -229,10 +405,10 @@ $date1=now();
                         "golpes" => ($poducionok / 5) ?? 0,
                         "golpesno" => ($poducionno / 5) ?? 0,
                         "diames" => $currentMonday->format('m') . ' ' . $index . "W " . $producnoche->produc,
-                        "plan" =>  $plane['cantidad'] ?? 0,
-                        "plan1" =>  $plane['cantidad'] + 1500 ?? 0
+                        "plan" => $plane['cantidad'] ?? 0,
+                        "plan1" => $plane['cantidad'] + 1500 ?? 0
                     ];
-                    array_push($dias,   $dataw);
+                    array_push($dias, $dataw);
                 } else {
                     $startOfMonth = $monday;
                 }
@@ -287,13 +463,13 @@ $date1=now();
                 $poducionok = $produc->produc;
             }
             $datadia = [
-                "golpes" =>  $poducionok,
+                "golpes" => $poducionok,
                 "golpesno" => $poducionno,
                 "diames" => $date->format('d/m') . " D /n" . $produc->produc,
                 "plan" => $buscarfe->first()->total_acumulado ?? 0,
                 "plan1" => $buscarfe->first()->total_acumulado + 1500 ?? 0
             ];
-            array_push($dias,  $datadia);
+            array_push($dias, $datadia);
             $poducionok = 0;
             $poducionno = 0;
             if ($producnoche->produc < $buscarfe->first()->total_acumulado) {
@@ -308,7 +484,7 @@ $date1=now();
                 "plan" => $buscarfe->first()->total_acumulado ?? 0,
                 "plan1" => $buscarfe->first()->total_acumulado + 1500 ?? 0
             ];
-            array_push($dias,  $datano);
+            array_push($dias, $datano);
         }
 
 
@@ -316,7 +492,7 @@ $date1=now();
 
 
 
-        return view('IOT.charts', compact('dataall', 'turnoant',  'dias', 'contadorp'));
+        return view('IOT.charts', compact('dataall', 'turnoant', 'dias'));
         // return view('IOT.charts');
     }
 
