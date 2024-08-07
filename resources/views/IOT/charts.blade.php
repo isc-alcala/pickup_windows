@@ -1,4 +1,4 @@
-<x-app-layout title="Charts">
+<x-app-layout title="Grafica prensa 2500">
     <div class="container grid px-6 mx-auto">
 
         <div class="w-full max-h-180">
@@ -29,7 +29,7 @@
 
     </div>
 
-    
+
     <script>
         var ctx = document.getElementById('bars1').getContext('2d');
         var datacontroller = @json($dataall); // Convertir los datos PHP a JSON
@@ -132,6 +132,7 @@
         var data1 = @json($dias); // Convertir los datos PHP a JSON
         var dia = data1.map(item => item.diames);
         var golpes = data1.map(item => item.golpes);
+        var label1 = data1.map(item => item.label1);
         var golpesno = data1.map(item => item.golpesno);
         var golpesplan = data1.map(item => item.plan);
         var golpesplan1 = data1.map(item => item.plan1);
@@ -177,6 +178,14 @@
                         borderWidth: 2,
                         data: golpesplan1,
                         tension: 0
+                    },
+                    {
+                        label: 'cantidad',
+                        backgroundColor: 'rgba(255, 99, 71,0 )',
+                        data: label1,
+                        type: 'line',
+                        borderWidth: 0.2,
+                        fill: false,
                     }
                 ]
             },
@@ -185,8 +194,7 @@
                     onComplete: function() {
                         var chartInstance = this.chart,
                             ctx = chartInstance.ctx;
-
-                        ctx.font = Chart.helpers.fontString(
+                            ctx.font = Chart.helpers.fontString(
                             Chart.defaults.global.defaultFontSize,
                             Chart.defaults.global.defaultFontStyle,
                             Chart.defaults.global.defaultFontFamily
@@ -194,19 +202,13 @@
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'bottom';
                         ctx.fillStyle = 'black'; // Asegurando que el color del texto sea negro
-
-
                         this.data.datasets.forEach(function(dataset, i) {
                             // Verifica si el tipo de dataset es 'bar'
-                            if (dataset.label === 'Golpes' || dataset.label ===
-                                'No plan') { // Solo mostrar valores de la barra verde
+                            if (dataset.label === 'cantidad') { // Solo mostrar valores de la barra verde
                                 var meta = chartInstance.controller.getDatasetMeta(i);
                                 meta.data.forEach(function(bar, index) {
-
                                     var data = dataset.data[index];
-
-
-                                    ctx.fillText(data, bar._model.x, bar._model.y - 10);
+                                    ctx.fillText(data, bar._model.x, bar._model.y - 20);
                                 });
                             }
                         });
@@ -237,7 +239,7 @@
     // Recargar la página cada 30 minutos (1800000 milisegundos)
     setTimeout(function() {
         location.reload();
-    }, 1800000); // 30 minutos en milisegundos
+    }, 18000000); // 30 minutos en milisegundos
 </script>
 
 
