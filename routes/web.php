@@ -7,6 +7,7 @@ use App\Http\Controllers\TruckController;
 use App\Http\Controllers\EstatusController;
 use App\Http\Controllers\RelacionesController;
 use App\Http\Controllers\ContactoDirectoController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IotController;
 use App\Models\ContactoDirecto;
 use App\Models\Relaciones;
@@ -26,17 +27,18 @@ use App\Http\Controllers\PlanPrensaController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('dashboard.index');
 });
-Route::resource('p2500', IotController::class);
+  Route::resource('dashboard',DashboardController::class);
+  Route::resource('trucks', truckController::class);
 // Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
 //     return view('dashboard');
 // })->name('dashboard');
 
 
 Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
-     Route::resource('dashboard', truckController::class);
-     Route::resource('IOT', IotController::class);
+     Route::resource('dashboard',DashboardController::class);
+
      Route::resource('IOTexcel', PlanPrensaController ::class);
      Route::get('/chart-data', [IotController::class, 'getDataForChart']);
     // // Route::view('/cliente/cliente', 'cliente.cliente')->name('cliente.cliente');

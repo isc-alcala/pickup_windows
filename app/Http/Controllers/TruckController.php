@@ -19,8 +19,13 @@ class TruckController extends Controller
      */
     public function index()
     {
-        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
-        return view('Dashboard',['trucks'=>$trucks]);
+    //     $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
+    //     return view('Dashboard',['trucks'=>$trucks]);
+    // $relaciones = relaciones::with(['cliente', 'contactoDirecto', 'carrier', 'rutas'])->get();
+
+    // return view('dashboard', ['relaciones' => $relaciones]);
+    $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
+    return view('Dashboard',['trucks'=>$trucks]);
     }
 
     /**

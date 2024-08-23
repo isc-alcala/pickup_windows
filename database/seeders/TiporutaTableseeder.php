@@ -15,12 +15,12 @@ class TiporutaTableseeder extends Seeder
     public function run(): void
     {
         DB::table('tipo_de_ruta')->insert([
-            'name' => 'T1',
-            'descripcion' => 'Proveedor directo'
+            'nombre' => 'Directa',
+            'descripcion' => 'Transporte directo'
         ]);
         DB::table('tipo_de_ruta')->insert([
-            'name' => 'T2',
-            'descripcion' => 'Proveedor Indirecto'
+            'nombre' => 'Compartida',
+            'descripcion' => 'Transporte compartido '
         ]);
     }
 }

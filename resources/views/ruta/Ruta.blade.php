@@ -26,24 +26,24 @@
                 <div class="mt-2">
                     @php
 
-                        $reg = $Truta[0];
+                        $reg = $Truta[0]??0;
 
-                        $reg1 = $Truta[1];
+                        $reg1 = $Truta[1]??0;
                     @endphp
 
                     <label class="inline-flex items-center text-gray-600 dark:text-gray-400">
                         <input type="radio"
                             class="text-purple-600 form-radio focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray"
                             name="truta" value="1" />
-                        <span class="ml-2">{{ $reg->nombre }}</span>
-                        <span class="ml-2">{{ $reg->descripcion }}</span>
+                        <span class="ml-2">{{ $reg->nombre??'' }}</span>
+                        <span class="ml-2">{{ $reg->descripcion??'' }}</span>
                     </label>
                     <label class="inline-flex items-center ml-6 text-gray-600 dark:text-gray-400">
                         <input type="radio"
                             class="text-purple-600 form-radio focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray"
                             name="truta" value="2" />
-                        <span class="ml-2">{{ $reg1->nombre }}</span>
-                        <span class="ml-2">{{ $reg1->descripcion }}</span>
+                        <span class="ml-2">{{ $reg1->nombre??'' }}</span>
+                        <span class="ml-2">{{ $reg1->descripcion??'' }}</span>
                     </label>
                 </div>
                 <div class="mt-2">

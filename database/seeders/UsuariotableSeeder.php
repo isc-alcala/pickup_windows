@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class UsuariotableSeeder extends Seeder
 {
@@ -14,10 +15,25 @@ class UsuariotableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('users')->insert([
+        User::create([
             'name' => 'Miguel  ',
-            'email' => 'miguel.alcala@ykm.com.mx',
-            'password' => Hash::make('123'),
-        ]);
+            'email' => 'admin.admin@ykm.com.mx',
+            'password' => bcrypt('123'),
+        ])->assignRole('Admin');
+        User::create([
+            'name' => 'Victor Rivera  ',
+            'email' => 'operaciones@operaciones.com',
+            'password' => bcrypt('123'),
+        ])->assignRole('Operaciones');
+        User::create([
+            'name' => 'Embarques  ',
+            'email' => 'embarques@embarques.com',
+            'password' => bcrypt('123'),
+        ])->assignRole('Embarques');
+        User::create([
+            'name' => 'Caseta  ',
+            'email' => 'caseta@caseta.com',
+            'password' => bcrypt('123'),
+        ])->assignRole('Caseta');
     }
 }
