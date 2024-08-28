@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Relaciones;
+use App\Models\Rutas;
+use App\Models\ContactoDirecto;
+use App\Models\Cliente;
+use App\Models\Carrier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class RelacionesController extends Controller
 {
@@ -14,12 +19,11 @@ class RelacionesController extends Controller
      */
     public function index()
     {
-        $truta = DB::table('Rutas')->get();
-        $tcliente = DB::table('Clientes')->get();
-        $tcontactodirecto = DB::table('Contacto_directo')->get();
-
-        $carrier = DB::table('carriers')->get();
-        $trelaciones = Relaciones::with([ 'cliente', 'contactoDirecto', 'carrier','rutas'])->get();
+        $truta = Rutas::where('estatus_id','1')->get();
+        $tcliente =Cliente::get();
+        $tcontactodirecto =Contactodirecto::where('estatus_id','1')->get();
+        $carrier = Carrier::where('estatus_id','1')->get();
+        $trelaciones = Relaciones::with([ 'cliente', 'contactoDirecto', 'carrier','rutas'])->where('estatus_id','1')->get();
 
         return view('relaciones.relaciones', ['Trelaciones' => $trelaciones, 'rutas' => $truta, 'contactodirectos' => $tcontactodirecto, 'carriers' => $carrier, 'clientes' => $tcliente]);
     }
@@ -43,6 +47,7 @@ class RelacionesController extends Controller
         $obj->Ruta_id = $request->input('ruta');
         $obj->carrier_id = $request->input('carrier');
         $obj->cliente_id = $request->input('cliente');
+        $obj->estatus_id=1;
         $user = Auth::user()->id;
         $obj->user_id = $user;
 
@@ -53,7 +58,7 @@ class RelacionesController extends Controller
         $tcontactodirecto = DB::table('Contacto_directo')->get();
 
         $carrier = DB::table('carriers')->get();
-        $trelaciones = Relaciones::with(['rutas', 'cliente', 'contactoDirecto', 'carrier'])->get();
+        $trelaciones = Relaciones::with(['rutas', 'cliente', 'contactoDirecto', 'carrier'])->where('estatus_id','1')->get();
         return view('relaciones.relaciones', ['Trelaciones' => $trelaciones, 'rutas' => $truta, 'contactodirectos' => $tcontactodirecto, 'carriers' => $carrier, 'clientes' => $tcliente]);
     }
 
@@ -84,8 +89,17 @@ class RelacionesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        $relaciones = Relaciones::find($request->id);
+
+        if ($relaciones) {
+            $relaciones->update(['estatus_id' => 7]);
+
+            return redirect()->back()->with('success', 'Post eliminado con éxito.');
+        } else {
+            return redirect()->back()->with('error', 'Post no encontrado.');
+        }
+
     }
 }

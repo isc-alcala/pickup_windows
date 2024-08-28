@@ -28,6 +28,10 @@ class estatus extends Model
     {
         return $this->hasMany(rutas::class);
     }
+    public function relaciones()
+    {
+        return $this->hasMany(rutas::class);
+    }
     public function contactodirecto()
     {
         return $this->hasMany(contactodirecto::class);

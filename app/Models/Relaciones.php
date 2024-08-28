@@ -11,9 +11,15 @@ class Relaciones extends Model
 
     protected $table = 'relaciones';
 
+    protected $fillable = ['estatus_id'];
+
     public function rutas()
     {
         return $this->belongsTo(Rutas::class,'ruta_id');
+    }
+    public function estatus()
+    {
+        return $this->belongsTo(estatus::class,'estatus_id');
     }
 
     public function carrier()
@@ -39,4 +45,5 @@ class Relaciones extends Model
     {
         return $this->hasMany(truck::class);
     }
+
 }

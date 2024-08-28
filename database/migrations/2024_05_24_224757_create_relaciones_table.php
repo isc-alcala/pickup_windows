@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('carrier_id');
             $table->unsignedBigInteger('cliente_id');
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('estatus_id');
             $table->unsignedBigInteger('contacto_directo_id');
             $table->timestamps();
 
@@ -26,6 +27,7 @@ return new class extends Migration
             $table->foreign('ruta_id')->references('id')->on('rutas')->onDelete('no action');
             $table->foreign('carrier_id')->references('id')->on('carriers')->onDelete('no action');
             $table->foreign('cliente_id')->references('id')->on('clientes')->onDelete('no action');
+            $table->foreign('estatus_id')->references('id')->on('estatus')->onDelete('no action');
             $table->foreign('contacto_directo_id')->references('id')->on('contacto_directo')->onDelete('no action');
 
         });

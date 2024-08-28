@@ -33,7 +33,7 @@ class TruckController extends Controller
      */
     public function create()
     {
-        $relaciones = relaciones::with(['cliente', 'contactoDirecto', 'carrier', 'rutas'])->get();
+        $relaciones = relaciones::with(['cliente', 'contactoDirecto', 'carrier', 'rutas'])->where('estatus_id','1')->get();
 
         return view('trucks.trucks', ['relaciones' => $relaciones]);
     }

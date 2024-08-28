@@ -13,7 +13,7 @@ class CarrierController extends Controller
      */
     public function index()
     {
-        $carrier=DB::table('carriers')->get();
+        $carrier = Carrier::where('estatus_id','1')->get();
         return view('carrier.carrier', ['Objs' => $carrier]);
     }
 
@@ -35,7 +35,7 @@ class CarrierController extends Controller
         $obj->descripcion = $request->input('descripcion');
         $obj->estatus_id = 1;
         $obj->save();
-        $carrier=DB::table('carriers')->get();
+        $carrier = DB::table('carriers')->get();
         return view('carrier.carrier', ['Objs' => $carrier]);
     }
 
@@ -66,14 +66,16 @@ class CarrierController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        $post = carrier::find($id);
-        if ($post) {
-            $post->delete();
-            return redirect()->route('carrier.index')->with('success', 'Post eliminado con éxito.');
-        }
+        $carrier = Carrier::find($request->id);
 
-        return redirect()->route('carrier.index')->with('error', 'Post no encontrado.');
+        if ($carrier) {
+            $carrier->update(['estatus_id' => 7]);
+
+            return redirect()->back()->with('success', 'Post eliminado con éxito.');
+        } else {
+            return redirect()->back()->with('error', 'Post no encontrado.');
+        }
     }
 }

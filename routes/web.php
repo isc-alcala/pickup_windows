@@ -14,6 +14,7 @@ use App\Models\Relaciones;
 use App\Models\Truck;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PlanPrensaController;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,10 +68,11 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
     Route::post('cliente.nuevo', [ClienteController::class, 'store'])->name('cliente.nuevo');
     Route::post('cliente.destroy', [ClienteController::class, 'destroyer'])->name('cliente.destroy');
     Route::post('carrier.nuevo', [CarrierController::class, 'store'])->name('carrier.nuevo');
-    Route::post('carrier.destroy', [CarrierController::class, 'destroy'])->name('carrier.destroy');
+    Route::get('carrier.destroy', [CarrierController::class, 'destroy'])->name('carrier.destroy');
     Route::post('ruta.ruta', [RutaController::class, 'store'])->name('ruta.nuevo');
     Route::post('Contacto_directo.ruta', [ContactoDirectoController::class, 'store'])->name('contactodirecto.nuevo');
     Route::post('relaciones.create', [RelacionesController::class, 'store'])->name('Relaciones.create');
+    Route::get('Relaciones.destroy', [RelacionesController::class, 'destroy'])->name('relaciones.destroy');
     Route::post('truck.create', [TruckController::class, 'store'])->name('truck.create');
     Route::post('truck.update', [TruckController::class, 'update'])->name('truck.update');
 
