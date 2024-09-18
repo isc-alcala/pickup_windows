@@ -5,7 +5,6 @@
             <a href="{{ url('/trucks') }}" class="text-sm text-gray-700 underline">Menu</a>
         @else
             <a href="{{ route('login') }}" class="text-sm text-gray-700 underline">Login</a>
-
             @if (Route::has('register'))
                 <a href="{{ route('register') }}" class="ml-4 text-sm text-gray-700 underline">Register</a>
             @endif
@@ -14,7 +13,7 @@
 @endif
     <div class="container grid px-6 mx-auto">
         <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-           Ventanas F2
+         Seguimiento ventanas
         </h2>
         <div class="w-full overflow-hidden rounded-lg shadow-xs">
             <div class="w-full overflow-x-auto">
@@ -28,7 +27,6 @@
                             <th class="px-4 py-3">Ruta</th>
                             <th class="px-4 py-3">ETA</th>
                             <th class="px-4 py-3">Estatus</th>
-
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
@@ -73,12 +71,10 @@
                                     {{ $truck->ETA }}
                                 </td>
                                 <td class="px-4 py-3 text-xs">
-                                    <span
-                                        class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+                                    <span   class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
                                         {{ $truck->latestbitcora->estatus->nombre }}
                                     </span>
                                 </td>
-
                             </tr>
                         @endforeach
                     </tbody>
@@ -87,7 +83,6 @@
             {{ $trucks->links() }}
         </div>
     </div>
-
 
 
 </x-guest-layout>

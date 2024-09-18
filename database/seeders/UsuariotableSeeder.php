@@ -16,7 +16,7 @@ class UsuariotableSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'name' => 'Miguel  ',
+            'name' => 'Admin  ',
             'email' => 'admin@admin.com',
             'password' => bcrypt('123'),
         ])->assignRole('Admin');

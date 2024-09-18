@@ -40,5 +40,15 @@ class estatus extends Model
     {
         return $this->hasMany(contactos_contacto_directo::class);
     }
+     public function transicionesOrigen()
+    {
+        return $this->hasMany(Transicion::class, 'estado_origen_id');
+    }
+
+    // Relación con las transiciones como estado de destino
+    public function transicionesDestino()
+    {
+        return $this->hasMany(Transicion::class, 'estado_destino_id');
+    }
 }
 

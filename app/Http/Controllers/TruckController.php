@@ -24,7 +24,8 @@ class TruckController extends Controller
     // $relaciones = relaciones::with(['cliente', 'contactoDirecto', 'carrier', 'rutas'])->get();
 
     // return view('dashboard', ['relaciones' => $relaciones]);
-    $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
+    $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus.transicionesOrigen'])->Paginate(5);
+
     return view('Dashboard',['trucks'=>$trucks]);
     }
 
@@ -51,7 +52,7 @@ class TruckController extends Controller
         $obj->back_operator_name = $request->input('BOP');
         $obj->relaciones_id = $request->input('relaciones');
         $dateTime =  strtotime($request->input('fecha'));
-        $obj->ETA = date('d/m/Y H:i:s',  $dateTime);
+        $obj->ETA = date('Y-m-d H:i:s',  $dateTime);
         $user = Auth::user()->id;
         $obj->user_id = $user;
 
@@ -61,10 +62,10 @@ class TruckController extends Controller
         $bit = new Bitacora();
         $bit->truck_id = $obj->id;
         $bit->user_id = $user;
-        $bit->estatus_id = 1;
-        $bit->comentario = "creado ";
+        $bit->estatus_id = 2;
+        $bit->comentario = "creado";
         $bit->save();
-        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora'])->Paginate(5);
+        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora','latestbitcora.estatus'])->Paginate(5);
         return view('dashboard', ['trucks' => $trucks]);
     }
 
@@ -89,7 +90,7 @@ class TruckController extends Controller
      */
     public function update(Request $request)
     {
-        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
+        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora','latestbitcora.estatus'])->Paginate(5);
 
         return view('Dashboard', ['trucks' => $trucks]);
     }

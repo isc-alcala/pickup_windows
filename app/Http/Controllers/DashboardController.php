@@ -12,6 +12,7 @@ class DashboardController extends Controller
     public function index()
     {
         $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
+
         return view('Dashboardtv',['trucks'=>$trucks]);
     }
 
@@ -20,7 +21,9 @@ class DashboardController extends Controller
      */
     public function viewst()
     {
-        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
+
+        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus','estatus.transicion'])->Paginate(5);
+
         return view('Dashboard',['trucks'=>$trucks]);
     }
 

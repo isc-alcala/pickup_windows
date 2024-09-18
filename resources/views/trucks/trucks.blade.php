@@ -15,34 +15,34 @@
                             <input
                                 class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                                 id='truck' name='truck'
-                                placeholder="" />
+                                placeholder="" required />
                 </label>
                 <label class="block text-sm">
                     <span class="text-gray-700 dark:text-gray-400">Número de contenedor </span>
                     <input
                         class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                         id='container' name='container'
-                        placeholder="" />
+                        placeholder="" required />
                 </label>
                 <label class="block text-sm">
                     <span class="text-gray-700 dark:text-gray-400">Placas</span>
                     <input
                         class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                         id='placas' name='placas'
-                        placeholder="" />
+                        placeholder="" required />
                 </label>
                 <label class="block text-sm">
                     <span class="text-gray-700 dark:text-gray-400">Nombre del Operador</span>
                     <input
                         class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                         id='OP' name='OP'
-                        placeholder="" />
+                        placeholder="" required />
                 </label>
                 <label class="block text-sm">
                     <span class="text-gray-700 dark:text-gray-400">Nombre del 2 Operador</span>
                     <input
                         class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
-                       id='BOP' name='BOP'
+                       id='BOP' name='BOP' value='N/A'
                         placeholder="Opcional" />
                 </label>
                 <label class="block text-sm">
@@ -51,7 +51,7 @@
                         <input type="datetime-local"
                             class="w-1/2 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                            id='fecha' name='fecha'
-                            placeholder="Opcional" />
+                            placeholder=""  required />
                     </div>
                 </label>
                 <label class="block mt-4 text-sm">
