@@ -15,7 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->text('descripcion')->nullable();
+            $table->unsignedBigInteger('estatus_id')->nullable();
             $table->timestamps();
+
+            // Foreign key constraint
+
+            $table->foreign('estatus_id')->references('id')->on('estatus')->onDelete('NO ACTION');
+
         });
     }
 

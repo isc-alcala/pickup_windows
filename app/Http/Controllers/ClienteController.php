@@ -13,8 +13,7 @@ class ClienteController extends Controller
      */
     public function index()
     {
-        $clientes = DB::table('clientes')->get();
-
+        $clientes = DB::table('clientes')->where('estatus_id','!=',7)->Paginate(10);
         return view('cliente.Cliente', ['clientes' => $clientes]);
     }
 
@@ -37,9 +36,10 @@ class ClienteController extends Controller
         $cliente->nombre = $request->input('nombre');
         $cliente->descripcion = $request->input('descripcion');
         $cliente->proyectos = $request->input('proyectos');
+        $cliente->estatus_id =1;
         $cliente->type_supplier_id = $request->input('Type');
         $cliente->save();
-        $clientes = DB::table('clientes')->get();
+        $clientes = DB::table('clientes')->where('estatus_id','!=',7)->Paginate(10);
         return view('cliente.Cliente', ['clientes' => $clientes]);
     }
 
@@ -70,16 +70,17 @@ class ClienteController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(int $id)
     {
 
-        $post = cliente::find($id);
 
-        if ($post) {
-            $post->delete();
-            return redirect()->route('cliente.index')->with('success', 'Post eliminado con éxito.');
-        }
+        $updated = DB::table('clientes')
+                 ->where('id', $id)
+                 ->update(['estatus_id' => 7]);
 
-        return redirect()->route('cliente.index')->with('error', 'Post no encontrado.');
+
+            return redirect()->route('cliente.index')->with('success', 'cliente eliminado con éxito.');
+
+
     }
 }

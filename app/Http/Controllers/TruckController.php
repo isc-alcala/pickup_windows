@@ -19,11 +19,7 @@ class TruckController extends Controller
      */
     public function index()
     {
-    //     $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus'])->Paginate(5);
-    //     return view('Dashboard',['trucks'=>$trucks]);
-    // $relaciones = relaciones::with(['cliente', 'contactoDirecto', 'carrier', 'rutas'])->get();
 
-    // return view('dashboard', ['relaciones' => $relaciones]);
     $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','latestbitcora.estatus.transicionesOrigen'])->Paginate(5);
 
     return view('Dashboard',['trucks'=>$trucks]);
@@ -52,7 +48,7 @@ class TruckController extends Controller
         $obj->back_operator_name = $request->input('BOP');
         $obj->relaciones_id = $request->input('relaciones');
         $dateTime =  strtotime($request->input('fecha'));
-        $obj->ETA = date('Y-m-d H:i:s',  $dateTime);
+        $obj->ETA = date('Y-m-d H:i',  $dateTime);
         $user = Auth::user()->id;
         $obj->user_id = $user;
 
@@ -65,8 +61,11 @@ class TruckController extends Controller
         $bit->estatus_id = 2;
         $bit->comentario = "creado";
         $bit->save();
-        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora','latestbitcora.estatus'])->Paginate(5);
-        return view('dashboard', ['trucks' => $trucks]);
+
+        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora','latestbitcora.estatus'])->orderby('estaus_id','asc')->Paginate(5);
+
+        return redirect()->route('truck.index')->with('success', 'cliente eliminado con éxito.');
+
     }
 
     /**
@@ -90,7 +89,7 @@ class TruckController extends Controller
      */
     public function update(Request $request)
     {
-        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora','latestbitcora.estatus'])->Paginate(5);
+        $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora','latestbitcora.estatus'])->orderby('estatus_id','desc')->Paginate(5);
 
         return view('Dashboard', ['trucks' => $trucks]);
     }
@@ -122,6 +121,7 @@ $estatus= estatus::where('id',$status)->first();
         $bit->save();
 
         $trucks = truck::with(['relaciones.cliente', 'relaciones.contactoDirecto', 'relaciones.carrier', 'relaciones.rutas','bitacora'])->Paginate(5);
-        return view('dashboard', ['trucks' => $trucks]);
+
+        return redirect()->route('trucks.index')->with('success', 'cliente eliminado con éxito.');
             }
 }

@@ -21,6 +21,6 @@ class DatabaseSeeder extends Seeder
         $this->call(EstatusSeeder::class);
         $this->call(TypeSupplyerSeeder::class);
         $this->call(UsuariotableSeeder::class);
-
+        $this->call(TransicionesSeeder::class);
     }
 }

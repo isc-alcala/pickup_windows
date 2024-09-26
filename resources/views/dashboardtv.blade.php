@@ -21,15 +21,15 @@
                     <thead>
                         <tr
                             class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
-                            <th class="px-4 py-3">Camion</th>
-                            <th class="px-4 py-3">Contenedor</th>
-                            <th class="px-4 py-3">Operadore(s)</th>
-                            <th class="px-4 py-3">Ruta</th>
-                            <th class="px-4 py-3">ETA</th>
-                            <th class="px-4 py-3">Estatus</th>
+                            <th class="px-4 py-3 cursor-pointer" onclick="sortTable(0)">Camion  &#x21C5;</th>
+                            <th class="px-4 py-3 cursor-pointer" onclick="sortTable(1)">Contenedor  &#x21C5;</th>
+                            <th class="px-4 py-3 cursor-pointer" onclick="sortTable(2)">Operadore(s)  &#x21C5;</th>
+                            <th class="px-4 py-3 cursor-pointer" onclick="sortTable(3)">Ruta  &#x21C5;</th>
+                            <th class="px-4 py-3 cursor-pointer" onclick="sortTable(4)">ETA  &#x21C5;</th>
+                            <th class="px-4 py-3 cursor-pointer" onclick="sortTable(5)">Estatus  &#x21C5;</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+                    <tbody  id="tabla"class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
                         @foreach ($trucks as $truck)
                             <tr class="text-gray-700 dark:text-gray-400">
                                 <td class="px-4 py-3">
@@ -74,6 +74,10 @@
                                     <span   class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
                                         {{ $truck->latestbitcora->estatus->nombre }}
                                     </span>
+                                    <br>
+                                    <span>
+                                    {{ $truck->latestbitcora->created_at}}
+                                    </span>
                                 </td>
                             </tr>
                         @endforeach
@@ -83,6 +87,53 @@
             {{ $trucks->links() }}
         </div>
     </div>
+    <script>
+        setInterval(function() {
+        window.location.reload();
+    }, 300000);
+    </script>
+    <script>
+        function sortTable(columnIndex) {
+            let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("tabla");
+            switching = true;
+            dir = "asc"; // Orden inicial ascendente
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+
+                for (i = 0; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+
+                    if (dir === "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir === "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
 
 
 </x-guest-layout>

@@ -72,7 +72,7 @@
                         <select
                             class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray
                                 "
-                            id='carrier' name='carrier'>
+                            id='carrier' name='carrier' required>
                             @foreach ($carriers as $carrier)
                                 <option value={{ $carrier->id }}>{{ $carrier->nombre }}</option>
                             @endforeach
@@ -122,23 +122,13 @@
                                 <td class="px-4 py-3 text-sm">
                                     {{ $relacion->contactodirecto->nombre }}
                                 </td>
-
                                 <td class="px-4 py-3 text-sm">
                                     {{ $relacion->rutas->nombre ?? '' }} </td>
                                 <td class="px-4 py-3 text-sm">
                                     {{ $relacion->carrier->nombre }} </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center space-x-4 text-sm">
-                                        <button
-                                            class="flex items-center justify-between px-2 py-2 text-sm font-medium leading-5 text-purple-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray"
-                                            aria-label="Edit">
-                                            <svg class="w-5 h-5" aria-hidden="true" fill="currentColor"
-                                                viewBox="0 0 20 20">
-                                                <path
-                                                    d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z">
-                                                </path>
-                                            </svg>
-                                        </button>
+
                                         <a href="{{ route('relaciones.destroy', ['id' => $relacion->id]) }}"
                                             class="flex items-center justify-between px-2 py-2 text-sm font-medium leading-5 text-purple-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray"
                                             aria-label="Delete">
@@ -164,39 +154,6 @@
 
             </div>
         </div>
-        {{--
-        <!-- General elements -->
-        <h4 class="mb-4 text-lg font-semibold text-gray-600 dark:text-gray-300">
-            Nuevo contacto
-        </h4>
-        <div class="px-4 py-3 mb-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
-            <label class="block text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Name</span>
-                <input
-                    class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
-                    placeholder="" />
-            </label>
-            <label class="block text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Telefono</span>
-                <input type='phone'
-                    class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
-                    placeholder="" />
-            </label>
-            <label class="block text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Correo</span>
-                <input type='mail'
-                    class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
-                    placeholder="" />
-            </label>
 
-
-
-        </div>
-        <div>
-            <button
-                class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
-                Regular
-            </button>
-        </div> --}}
     </div>
 </x-app-layout>

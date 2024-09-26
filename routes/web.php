@@ -14,6 +14,7 @@ use App\Models\Relaciones;
 use App\Models\Truck;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PlanPrensaController;
+use App\Models\Carrier;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /*
@@ -30,31 +31,22 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 Route::get('/', function () {
     return redirect()->route('dashboard.index');
 });
-  Route::resource('dashboard',DashboardController::class);
-  Route::resource('trucks', truckController::class);
-// Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
-//     return view('dashboard');
-// })->name('dashboard');
+
 
 
 Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
      Route::resource('dashboard',DashboardController::class);
+     Route::resource('trucks', truckController::class);
 
-     Route::resource('IOTexcel', PlanPrensaController ::class);
      Route::get('/chart-data', [IotController::class, 'getDataForChart']);
     // // Route::view('/cliente/cliente', 'cliente.cliente')->name('cliente.cliente');
-    Route::view('forms', 'forms')->name('forms');
-    Route::view('cards', 'cards')->name('cards');
-    Route::view('charts', 'charts')->name('charts');
-    Route::view('buttons', 'buttons')->name('buttons');
-    Route::view('modals', 'modals')->name('modals');
-    Route::view('tables', 'tables')->name('tables');
-    Route::view('calendar', 'calendar')->name('calendar');
-
-
-    Route::post('import', [PlanPrensaController::class, 'import']);
-    Route::post('import2', [PlanPrensaController::class, 'import2']);
-
+    // Route::view('forms', 'forms')->name('forms');
+    // Route::view('cards', 'cards')->name('cards');
+    // Route::view('charts', 'charts')->name('charts');
+    // Route::view('buttons', 'buttons')->name('buttons');
+    // Route::view('modals', 'modals')->name('modals');
+    // Route::view('tables', 'tables')->name('tables');
+    // Route::view('calendar', 'calendar')->name('calendar');
 
     Route::resource('cliente', ClienteController::class);
     Route::resource('trucks', truckController::class);
@@ -66,7 +58,10 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
 
     // Route::post('IOT.excel', [plancpController::class, 'index'])->name('IOT.index');
     Route::post('cliente.nuevo', [ClienteController::class, 'store'])->name('cliente.nuevo');
-    Route::post('cliente.destroy', [ClienteController::class, 'destroyer'])->name('cliente.destroy');
+    Route::delete('cliente/{id}', [ClienteController::class, 'destroy'])->name('cliente.destroy');
+    Route::delete('Contacto_directo/{id}', [ContactoDirectoController::class, 'destroy'])->name('contactodirecto.destroy');
+    Route::delete('ruta/{id}', [RutaController::class, 'destroy'])->name('ruta.destroy');
+    Route::delete('carrier/{id}', [CarrierController::class, 'destroy'])->name('carrier.destroy');
     Route::post('carrier.nuevo', [CarrierController::class, 'store'])->name('carrier.nuevo');
     Route::get('carrier.destroy', [CarrierController::class, 'destroy'])->name('carrier.destroy');
     Route::post('ruta.ruta', [RutaController::class, 'store'])->name('ruta.nuevo');
@@ -75,10 +70,6 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
     Route::get('Relaciones.destroy', [RelacionesController::class, 'destroy'])->name('relaciones.destroy');
     Route::post('truck.create', [TruckController::class, 'store'])->name('truck.create');
     Route::post('truck.update', [TruckController::class, 'update'])->name('truck.update');
-
     Route::post('truck.status', [TruckController::class, 'status'])->name('truck.status');
-
-
-    Route::get('/api/get-data', [App\Http\Controllers\IotturnoController::class, 'getData']);
     Route::get('truck-test/{id}/{status}', [TruckController::class, 'test'])->name('truck.test');
 });

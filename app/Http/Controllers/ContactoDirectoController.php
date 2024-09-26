@@ -12,7 +12,7 @@ class ContactoDirectoController extends Controller
      */
     public function index()
     {
-        $tabla=DB::table('contacto_directo')->get();
+        $tabla=DB::table('contacto_directo')->where('estatus_id','!=',7)->paginate(10);
         return view('contacto_directo.contacto_directo', ['Objs' => $tabla]);
 
     }
@@ -35,7 +35,7 @@ class ContactoDirectoController extends Controller
         $obj->descripcion = $request->input('descripcion');
         $obj->estatus_id = 1;
         $obj->save();
-        $tabla=DB::table('contacto_directo')->get();
+        $tabla=DB::table('contacto_directo')->where('estatus_id','!=',7)->paginate(10);
         return view('contacto_directo.contacto_directo', ['Objs' => $tabla]);
     }
 
@@ -66,6 +66,12 @@ class ContactoDirectoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $updated = DB::table('contacto_directo')
+        ->where('id', $id)
+        ->update(['estatus_id' => 7]);
+
+
+   return redirect()->route('Contactodirecto.index')->with('success', 'cliente eliminado con éxito.');
+
     }
 }

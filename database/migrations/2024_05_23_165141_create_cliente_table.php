@@ -16,11 +16,14 @@ return new class extends Migration
             $table->string('nombre');
             $table->text('descripcion')->nullable();
             $table->string('proyectos')->nullable();
+            $table->unsignedBigInteger('estatus_id');
+
             $table->unsignedBigInteger('type_supplier_id');
             $table->timestamps();
 
             // Foreign key constraint
             $table->foreign('type_supplier_id')->references('id')->on('type_supplier')->onDelete('cascade');
+            $table->foreign('estatus_id')->references('id')->on('estatus')->onDelete('cascade');
         });
     }
 
